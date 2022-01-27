@@ -1,15 +1,3 @@
-import pygame
-from os import path
-
-"""
-    Settings
-"""
-project_title = "Army Rush"
-screen_size = WIDTH, HEIGHT = 1280, 720
-FPS = 60
-default_volume = 5
-default_sound_volume = 75
-
 """
     Colors
 """

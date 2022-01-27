@@ -9,27 +9,32 @@ vec = pygame.math.Vector2
     Sprite (Initialization)
 """
 def init_sprite(self, main, group, dict, data, item, parent, variable, action):
-    # Class
-    self.main = main
-    self.game = main.game
+    # Classes
+    self.main = main.main
+    self.game = self.main.game
 
-    # Group
+    # Groups
     self.groups = self.main.all_sprites, group
     pygame.sprite.Sprite.__init__(self, self.groups)
 
-    # Dict
+    # Dicts
     self.dict = dict
     self.data = data
     self.item = item
-    self.object = self.dict[self.data][self.item]
-    if "settings" in self.object:
-        self.settings = self.dict["settings"][self.object["settings"]]
-    elif self.data in self.dict["settings"]:
-        self.settings = self.dict["settings"][self.data]
-    else:
-        self.settings = {}
 
-    # Variable
+    # Object
+    if self.data is not None and self.item is not None:
+        self.object = self.dict[self.data][self.item]
+
+        # Settings
+        if "settings" in self.object:
+            self.settings = self.dict["settings"][self.object["settings"]]
+        elif self.data in self.dict["settings"]:
+            self.settings = self.dict["settings"][self.data]
+        else:
+            self.settings = {}
+
+    # Variables
     self.parent = parent
     self.variable = variable
     self.action = action
@@ -38,6 +43,7 @@ def init_sprite(self, main, group, dict, data, item, parent, variable, action):
     self.init()
     self.load()
     self.new()
+
 
 def init_sprite_text(self, text=None):
     # Text
@@ -50,7 +56,7 @@ def init_sprite_text(self, text=None):
     else:
         self.text = None
 
-    # Pos
+    # Position
     if "text_pos" in self.object:
         self.text_pos = self.object["text_pos"]
     if "text_pos" in self.settings:
@@ -75,7 +81,7 @@ def init_sprite_text(self, text=None):
         self.font = None
         print("Font not initialized")
 
-    # Color
+    # Font color
     if "font_color" in self.settings:
         self.font_color = self.settings["font_color"]
     else:
