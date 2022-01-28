@@ -39,7 +39,7 @@ class Game:
             sprite.variable = [self.player, id]
 
             # WIP
-            update_sprite_rect(sprite, 20 + 70*id, 500)
+            update_sprite_rect(sprite, 0 + 320*(id-1), 500)
 
 
     def unit_production(self, args):
@@ -226,7 +226,7 @@ MAIN_DICT = {
                 "inactive_color": LIGHT_SKY_BLUE, "active_color": DARK_SKY_BLUE,
                 "sound_action": None, "sound_active": None, "sound_inactive": None},
             "icon": {
-                "align": "nw", "size": (50, 50),
+                "align": "nw", "size": (320, 50),
                 "border": True, "border_size": (5, 5), "border_color": BLACK,
                 "text_align": "center", "font": "LiberationSerif", "font_color": WHITE,
                 "inactive_color": LIGHT_SKY_BLUE, "active_color": DARK_SKY_BLUE,
@@ -238,7 +238,7 @@ MAIN_DICT = {
             "exit": {"settings": "default", "pos": [20, 160], "text": "Exit", "action": "self.main.quit_game"},
         },
         "production": {
-            "unit": {"settings": "icon", "pos": [20, 0], "action": "self.game.unit_production"},
+            "unit": {"settings": "icon", "pos": [0, 0], "action": "self.game.unit_production"},
         }
     },
 }

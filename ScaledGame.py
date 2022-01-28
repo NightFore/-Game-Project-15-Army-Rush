@@ -94,9 +94,9 @@ class ScaledGame(pygame.Surface):
             self.game_scaled = self.get_resolution(ss, self.game_size)
 
             # Zoom
-            if ss[0] == self.screen_info.current_w:
+            if ss[0] + self.game_gap[0] == self.screen_info.current_w:
                 self.game_gap = int((self.screen_info.current_w - self.game_scaled[0]) / 2), self.game_gap[1]
-                self.game_scaled = self.game_scaled[0] + self.game_gap[0], self.game_scaled[1]
+                self.game_scaled = self.game_scaled[0], self.game_scaled[1]
                 self.zoom = True
             elif self.zoom:
                 self.game_gap = 0, 0
@@ -104,7 +104,9 @@ class ScaledGame(pygame.Surface):
                 self.zoom = False
 
             # Scale game to screen resolution, keeping aspect ratio
-            self.screen = pygame.display.set_mode(self.game_scaled, RESIZABLE)
+            self.screen_w = self.game_scaled[0] + self.game_gap[0] * 2
+            self.screen_h = self.game_scaled[1] + self.game_gap[1] * 2
+            self.screen = pygame.display.set_mode((self.screen_w, self.screen_h), RESIZABLE)
             self.resize = False
 
             # Variables that can be used to resize the position on the aspect ratio
@@ -113,5 +115,4 @@ class ScaledGame(pygame.Surface):
 
         # Add game to screen with the scaled size and gap required.
         self.screen.blit(pygame.transform.scale(self, self.game_scaled), self.game_gap)
-
         pygame.display.flip()
