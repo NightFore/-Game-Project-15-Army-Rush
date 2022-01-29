@@ -11,16 +11,15 @@ vec = pygame.math.Vector2
 
 class Main:
     def __init__(self):
-        self.init()
-        self.load()
-        self.new()
-        self.update_menu()
-
-    def init(self):
+        self.main = self
         pygame.mixer.pre_init(44100, -16, 2, 2048)
         pygame.mixer.init()
         pygame.init()
         random.seed()
+        self.load()
+        self.new()
+        self.game = Game(self)
+        self.update_menu()
 
     def load(self):
         # Dictionaries
@@ -74,9 +73,7 @@ class Main:
         pygame.key.set_repeat(self.key_delay, self.key_interval)
 
     def new(self):
-        # Initialization
-        self.main = self
-        self.game = Game(self)
+        # Game Initialization
         self.all_sprites = pygame.sprite.LayeredUpdates()
         self.playing = True
         self.menu = "main_menu"
@@ -184,14 +181,13 @@ class Main:
 
     def update_menu(self, menu=None):
         if menu is None:
-            menu = self.menu
+            self.update_menu(self.menu)
         else:
             self.menu = menu
-        menu_dict = self.main_dict["menu"][menu]
-        self.clear_sprites()
-        self.update_background(menu_dict["background"])
-        self.update_music(menu_dict["music"])
-        self.update_button(self.button_dict[self.menu], data=self.menu)
+            self.clear_sprites()
+            self.update_background(self.menu_dict[self.menu]["background"])
+            self.update_music(self.menu_dict[self.menu]["music"])
+            self.update_button(self.button_dict[self.menu], data=self.menu)
 
     def update_background(self, background):
         if isinstance(background, str):

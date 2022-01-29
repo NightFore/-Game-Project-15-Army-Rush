@@ -11,14 +11,16 @@ class Game:
     def __init__(self, main):
         self.main = main
         self.game = self
+        self.load()
+        self.new()
+
+    def load(self):
         self.game_dict = self.main.main_dict["game"]
         self.settings_dict = self.game_dict["settings"]
         self.button_dict = self.main.button_dict
-        self.init_game()
 
-    def init_game(self):
+    def new(self):
         self.players = pygame.sprite.Group()
-
         self.buttons = pygame.sprite.Group()
         self.buttons_unit = pygame.sprite.Group()
 
@@ -44,21 +46,23 @@ class Game:
 
     def unit_production(self, args):
         """
-        args = [player, id]
+        args = [player: class, id: int]
         """
         player = args[0]
         id = args[1]
-
         unit = self.game_dict["unit"][id]
+
+        # Check resources
         check_gold = player.current_gold >= unit["cost_gold"]
         check_mana = player.current_mana >= unit["cost_mana"]
         check_supply = player.current_supply + unit["cost_supply"] <= player.max_supply
+
+        # Production
         if check_gold and check_mana and check_supply:
             print("%s have been produced!" % unit["name"])
             player.current_gold -= unit["cost_gold"]
             player.current_mana -= unit["cost_mana"]
             player.current_supply += unit["cost_supply"]
-
             Unit(self.main, player.units, self.game_dict, data="unit", item=id, parent=player)
         else:
             print("You don't have enough resources!")
@@ -242,54 +246,3 @@ MAIN_DICT = {
         }
     },
 }
-
-
-
-"""
-    WIP
-self.name
-self.gain_experience
-
-self.cost_gold
-self.cost_mana
-self.cost_supply
-self.delay_production
-
-self.speed_move
-self.type_attack
-self.type_armor
-
-self.health_base
-self.health_upgrade
-self.health_research
-self.health_current
-self.health_max
-
-self.attack_base
-self.attack_upgrade
-self.attack_research
-self.attack_current
-self.attack_max
-self.attack_range
-self.attack_speed
-self.last_attack
-
-self.armor_base
-self.armor_upgrade
-self.armor_research
-self.armor_current
-self.armor_max
-
-self.spell_cost_mana
-
-self.upgrade_cost_gold
-self.upgrade_cost_mana
-
-self.village_gain_gold
-self.village_gain_supply
-
-self.altar_gain_mana
-
-self.research_cost_experience
-"""
-
