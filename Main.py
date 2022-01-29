@@ -22,6 +22,7 @@ class Game:
 
     def new(self):
         self.players = pygame.sprite.Group()
+        self.castles = pygame.sprite.Group()
         self.buttons = pygame.sprite.Group()
         self.buttons_unit = pygame.sprite.Group()
 
@@ -44,7 +45,7 @@ class Game:
                 sprite.variable = [self.player, id]
 
                 # WIP
-                self.main.update_sprite_rect(sprite, 320*(id-1), 500)
+                self.main.update_sprite_rect(sprite, 320*(id-1), 650)
 
 
     def unit_production(self, args):
@@ -87,6 +88,8 @@ class Player(pygame.sprite.Sprite):
         self.rect = [0, 0, 0, 0]
 
     def init(self):
+        self.castle = Castle(self.main, self.game.castles, self.main.main_dict, data="castle", item=1, parent=self)
+
         # Gold
         self.current_gold = 250
         self.gain_gold = 1
@@ -112,7 +115,7 @@ class Player(pygame.sprite.Sprite):
         pass
 
     def update(self):
-        pass
+        self.game.resources_production(self)
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, main, group, dict, data=None, item=None, parent=None, variable=None, action=None):
@@ -181,14 +184,11 @@ class Unit(pygame.sprite.Sprite):
         pass
 
     def update(self):
-        self.game.unit_move(self)
         """
         if:
             self.check_range()
-        else:
-            self.move()
         """
-        pass
+        self.game.unit_move(self)
 
     def check_range(self):
         """
@@ -199,7 +199,25 @@ class Unit(pygame.sprite.Sprite):
         """
         pass
 
-    def move(self):
+
+class Castle(pygame.sprite.Sprite):
+    def __init__(self, main, group, dict, data=None, item=None, parent=None, variable=None, action=None):
+        init_sprite(self, main, group, dict, data, item, parent, variable, action)
+        init_sprite_surface(self)
+
+    def init(self):
+        pass
+
+    def load(self):
+        pass
+
+    def new(self):
+        pass
+
+    def draw(self):
+        pass
+
+    def update(self):
         pass
 
 
@@ -226,12 +244,20 @@ MAIN_DICT = {
 
     "unit": {
         "settings": {
-            "pos": [50, 350], "size": [50, 50], "vel": vec(50, 0), "acc": vec(0, 0), "align": "sw"
+            "pos": [20, 500], "size": [50, 50], "vel": vec(50, 0), "acc": vec(0, 0), "align": "sw"
         },
         1: {"name": "Peasant", "cost_gold": 50, "cost_mana": 0, "cost_supply": 1},
         2: {"name": "Squire", "cost_gold": 100, "cost_mana": 0, "cost_supply": 1},
         3: {"name": "Archer", "cost_gold": 125, "cost_mana": 0, "cost_supply": 1},
         4: {"name": "Priest", "cost_gold": 150, "cost_mana": 25, "cost_supply": 1},
+    },
+
+    "castle": {
+        "settings": {
+            "pos": [20, 500], "size": [250, 250], "align": "sw"
+        },
+        1: {},
+        2: {}
     },
 
 
