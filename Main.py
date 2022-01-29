@@ -39,11 +39,12 @@ class Game:
         # Unit Production
         item = "unit"
         for id in self.main_dict[item]:
-            sprite = Button(self, self.buttons_unit, self.button_dict, data=data, item=item)
-            sprite.variable = [self.player, id]
+            if isinstance(id, int):
+                sprite = Button(self, self.buttons_unit, self.button_dict, data=data, item=item)
+                sprite.variable = [self.player, id]
 
-            # WIP
-            self.main.update_sprite_rect(sprite, 0 + 320*(id-1), 500)
+                # WIP
+                self.main.update_sprite_rect(sprite, 320*(id-1), 500)
 
 
     def unit_production(self, args):
@@ -161,15 +162,10 @@ class Enemy(pygame.sprite.Sprite):
 class Unit(pygame.sprite.Sprite):
     def __init__(self, main, group, dict, data=None, item=None, parent=None, variable=None, action=None):
         init_sprite(self, main, group, dict, data, item, parent, variable, action)
+        init_sprite_surface(self)
 
     def init(self):
-        init_sprite_surface(self)
-        self.rect = [50, 350, 50, 50]
-        self.pos = self.rect[0], self.rect[1]
-        self.size = self.rect[2], self.rect[3]
-        self.vel = vec(50, 0)
-        self.align = "nw"
-        self.surface = pygame.Surface(self.size)
+        pass
 
     def load(self):
         pass
@@ -215,7 +211,6 @@ def unit_attack(sprite_1, sprite_2):
         sprite_2.kill()
 
 
-
 MAIN_DICT = {
     # Game Dict
     "game": {
@@ -230,6 +225,9 @@ MAIN_DICT = {
     },
 
     "unit": {
+        "settings": {
+            "pos": [50, 350], "size": [50, 50], "vel": vec(50, 0), "acc": vec(0, 0), "align": "sw"
+        },
         1: {"name": "Peasant", "cost_gold": 50, "cost_mana": 0, "cost_supply": 1},
         2: {"name": "Squire", "cost_gold": 100, "cost_mana": 0, "cost_supply": 1},
         3: {"name": "Archer", "cost_gold": 125, "cost_mana": 0, "cost_supply": 1},

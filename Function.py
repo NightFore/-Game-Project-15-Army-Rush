@@ -49,7 +49,10 @@ def init_sprite(self, main, group, dict, data, item, parent, variable, action):
         # Settings
         if "settings" in self.object:
             self.settings = self.dict["settings"][self.object["settings"]]
+        elif "settings" in self.dict[self.data]:
+            self.settings = self.dict[self.data]["settings"]
         else:
+            print("Settings not initialized")
             self.settings = {}
 
     # Variables
@@ -91,6 +94,7 @@ def init_sprite_text(self, text=None):
 def init_sprite_surface(self):
     """
     pos, size, align, color
+    vel, acc
     border_size, border_color
     surface, surface_rect, rect
     """
@@ -99,6 +103,9 @@ def init_sprite_surface(self):
     self.size = load_dict_item(self, "size", [0, 0])
     self.align = load_dict_item(self, "align", "center")
     self.color = load_dict_item(self, "color")
+
+    self.vel = load_dict_item(self, "vel", vec(0, 0))
+    self.acc = load_dict_item(self, "acc", vec(0, 0))
 
     self.border_size = load_dict_item(self, "border_size", [0, 0])
     self.border_color = load_dict_item(self, "border_color")
