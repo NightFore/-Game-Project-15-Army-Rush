@@ -101,19 +101,19 @@ def init_sprite_text(self, text=None):
 """
 def init_sprite_surface(self):
     """
-    pos, size, align, color
-    vel, acc
+    pos, vel, acc,
+    size, align, color
     border_size, border_color
     surface, surface_rect, rect
     """
 
-    self.pos = load_dict_item(self, "pos", [0, 0]).copy()
+    self.pos = vec(load_dict_item(self, "pos", [0, 0]).copy())
+    self.vel = vec(load_dict_item(self, "vel", [0, 0]).copy())
+    self.acc = vec(load_dict_item(self, "acc", [0, 0]).copy())
+
     self.size = load_dict_item(self, "size", [0, 0])
     self.align = load_dict_item(self, "align", "center")
     self.color = load_dict_item(self, "color")
-
-    self.vel = load_dict_item(self, "vel", vec(0, 0))
-    self.acc = load_dict_item(self, "acc", vec(0, 0))
 
     self.border_size = load_dict_item(self, "border_size", [0, 0])
     self.border_color = load_dict_item(self, "border_color")

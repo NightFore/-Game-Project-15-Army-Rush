@@ -148,6 +148,8 @@ class Unit(pygame.sprite.Sprite):
         init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
 
     def init(self):
+        self.vel.x *= self.parent.vel.x
+        self.align = self.parent.align
         self.main.update_sprite_rect(self, self.parent.pos[0], self.parent.pos[1])
 
     def load(self):
@@ -185,6 +187,7 @@ class Castle(pygame.sprite.Sprite):
         init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
 
     def init(self):
+        self.align = self.parent.align
         self.main.update_sprite_rect(self, self.parent.pos[0], self.parent.pos[1])
 
     def load(self):
@@ -207,13 +210,13 @@ MAIN_DICT = {
         "key_repeat": (100, 30)},
 
     "settings": {
-        "unit": {"size": [50, 50], "align": "sw", "vel": vec(50, 0), "acc": vec(0, 0)},
+        "unit": {"size": [50, 50], "align": "sw", "vel": [50, 0], "acc": [0, 0]},
         "castle": {"size": [250, 250], "align": "sw"},
     },
 
     "players": {
-        1: {"pos": [20, 500], "align": "sw"},
-        2: {"pos": [1210, 500], "align": "se"},
+        1: {"pos": [20, 500], "vel": [1, 0], "align": "sw"},
+        2: {"pos": [1260, 500], "vel": [-1, 0], "align": "se"},
     },
 
     "castle": {
