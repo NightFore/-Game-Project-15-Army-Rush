@@ -49,11 +49,14 @@ class Main:
             self.sound_effects[sound].set_volume(self.sound_volume / 100)
 
         # Fonts
-        self.font = pygame.font.Font(None, 100)
         for font in self.font_dict:
             font_ttf = self.font_dict[font]["ttf"]
             font_size = self.font_dict[font]["size"]
-            self.font_dict[font] = pygame.font.Font(path.join(self.font_folder, font_ttf), font_size)
+            if font_ttf is not None:
+                self.font_dict[font] = pygame.font.Font(path.join(self.font_folder, font_ttf), font_size)
+            else:
+                self.font_dict[font] = pygame.font.Font(font_ttf, font_size)
+        self.font = self.font_dict["default"]
 
         # Game Settings
         self.project_title = self.game_dict["project_title"]

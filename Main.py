@@ -85,6 +85,7 @@ class Player(pygame.sprite.Sprite):
     def init(self):
         self.units = pygame.sprite.Group()
         self.castle = Castle(self.main, self.game.castles, self.main.main_dict, data="castle", item=self.item, parent=self)
+        self.load_interface()
 
     def load(self):
         # Gold
@@ -99,11 +100,39 @@ class Player(pygame.sprite.Sprite):
         self.current_supply = 0
         self.max_supply = 10
 
+    def load_interface(self):
+        # Initialization
+        self.ui_data = "interface_box"
+        self.ui_item = 1
+        self.ui_object = self.dict[self.ui_data][self.ui_item]
+        self.ui_settings = self.dict["settings"][self.ui_data]
+
+        # Box
+        self.ui_pos = self.ui_object["pos"]
+        self.ui_size = self.ui_settings["size"]
+        self.ui_border_size = self.ui_settings["border_size"]
+        self.ui_color = self.ui_settings["color"]
+        self.ui_border_color = self.ui_settings["border_color"]
+        self.ui_align = self.ui_settings["align"]
+        self.ui_rect = [self.ui_pos[0], self.ui_pos[1], self.ui_size[0], self.ui_size[1]]
+
+        # Font
+        self.ui_font = self.main.font_dict[self.ui_settings["font"]]
+        self.ui_font_color = self.ui_settings["font_color"]
+
+    def draw_interface(self):
+        # Box
+        self.main.draw_surface(self.ui_align, self.ui_rect, self.ui_color, self.ui_border_size, self.ui_border_color)
+
+        # Text
+        self.wip_text_pos = [500, 250]
+        self.main.draw_text("Gold: %i" % self.current_gold, self.ui_font, self.ui_font_color, self.wip_text_pos, self.ui_align)
+
     def new(self):
         pass
 
     def draw(self):
-        pass
+        self.draw_interface()
 
     def update(self):
         self.game.resources_production(self)
@@ -210,8 +239,16 @@ MAIN_DICT = {
         "key_repeat": (100, 30)},
 
     "settings": {
+        "interface_box": {"size": [310, 210], "border_size": [6, 6], "align": "nw",
+                          "color": DARKGREY, "border_color": LIGHTSKYGREY,
+                          "font": "LiberationSerif", "font_color": WHITE},
+        "players": {},
         "unit": {"size": [50, 50], "align": "sw", "vel": [50, 0], "acc": [0, 0]},
         "castle": {"size": [250, 250], "align": "sw"},
+    },
+
+    "interface_box": {
+        1: {"pos": [960, 140]},
     },
 
     "players": {
@@ -255,6 +292,7 @@ MAIN_DICT = {
 
     # Font Dict
     "font": {
+        "default": {"ttf": None, "size": 100},
         "LiberationSerif": {"ttf": "LiberationSerif-Regular.ttf", "size": 40}
     },
 
