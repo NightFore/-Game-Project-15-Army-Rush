@@ -103,29 +103,35 @@ class Player(pygame.sprite.Sprite):
     def load_interface(self):
         # Initialization
         self.ui_data = "interface_box"
-        self.ui_item = 1
-        self.ui_object = self.dict[self.ui_data][self.ui_item]
         self.ui_settings = self.dict["settings"][self.ui_data]
 
         # Box
-        self.ui_pos = self.ui_object["pos"]
         self.ui_size = self.ui_settings["size"]
         self.ui_border_size = self.ui_settings["border_size"]
         self.ui_color = self.ui_settings["color"]
         self.ui_border_color = self.ui_settings["border_color"]
         self.ui_align = self.ui_settings["align"]
-        self.ui_rect = [self.ui_pos[0], self.ui_pos[1], self.ui_size[0], self.ui_size[1]]
 
         # Font
         self.ui_font = self.main.font_dict[self.ui_settings["font"]]
         self.ui_font_color = self.ui_settings["font_color"]
 
-    def draw_interface(self):
-        # Box
-        self.main.draw_surface(self.ui_align, self.ui_rect, self.ui_color, self.ui_border_size, self.ui_border_color)
+        # Object
+        self.ui_item = 1
+        self.ui_object = self.dict[self.ui_data][self.ui_item]
+        self.ui_pos = self.ui_object["pos"]
+        self.ui_rect_1 = [self.ui_pos[0], self.ui_pos[1], self.ui_size[0], self.ui_size[1]]
 
-        # Text
-        self.wip_text_pos = [500, 250]
+        self.ui_item = 2
+        self.ui_object = self.dict[self.ui_data][self.ui_item]
+        self.ui_pos = self.ui_object["pos"]
+        self.ui_rect_2 = [self.ui_pos[0], self.ui_pos[1], self.ui_size[0], self.ui_size[1]]
+
+        self.wip_text_pos = [1120, 18]
+
+    def draw_interface(self):
+        self.main.draw_surface(self.ui_align, self.ui_rect_1, self.ui_color, self.ui_border_size, self.ui_border_color)
+        self.main.draw_surface(self.ui_align, self.ui_rect_2, self.ui_color, self.ui_border_size, self.ui_border_color)
         self.main.draw_text("Gold: %i" % self.current_gold, self.ui_font, self.ui_font_color, self.wip_text_pos, self.ui_align)
 
     def new(self):
@@ -239,16 +245,17 @@ MAIN_DICT = {
         "key_repeat": (100, 30)},
 
     "settings": {
-        "interface_box": {"size": [310, 210], "border_size": [6, 6], "align": "nw",
+        "interface_box": {"size": [180, 50], "border_size": [6, 6], "align": "nw",
                           "color": DARKGREY, "border_color": LIGHTSKYGREY,
-                          "font": "LiberationSerif", "font_color": WHITE},
+                          "font": "LiberationSerif_30", "font_color": WHITE},
         "players": {},
         "unit": {"size": [50, 50], "align": "sw", "vel": [50, 0], "acc": [0, 0]},
         "castle": {"size": [250, 250], "align": "sw"},
     },
 
     "interface_box": {
-        1: {"pos": [960, 140]},
+        1: {"pos": [1090, 10]},
+        2: {"pos": [900, 10]},
     },
 
     "players": {
@@ -293,7 +300,8 @@ MAIN_DICT = {
     # Font Dict
     "font": {
         "default": {"ttf": None, "size": 100},
-        "LiberationSerif": {"ttf": "LiberationSerif-Regular.ttf", "size": 40}
+        "LiberationSerif": {"ttf": "LiberationSerif-Regular.ttf", "size": 40},
+        "LiberationSerif_30": {"ttf": "LiberationSerif-Regular.ttf", "size": 30}
     },
 
 
