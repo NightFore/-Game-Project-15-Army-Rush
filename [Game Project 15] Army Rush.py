@@ -25,7 +25,7 @@ class Main:
         # Dictionaries
         self.main_dict = MAIN_DICT
         self.game_dict = self.main_dict["game"]
-        self.settings_dict = self.game_dict["settings"]
+        self.settings_dict = self.main_dict["settings"]
         self.background_dict = self.main_dict["background"]
         self.music_dict = self.main_dict["music"]
         self.sound_dict = self.main_dict["sound"]
@@ -56,20 +56,20 @@ class Main:
             self.font_dict[font] = pygame.font.Font(path.join(self.font_folder, font_ttf), font_size)
 
         # Game Settings
-        self.project_title = self.settings_dict["project_title"]
-        self.screen_size = self.screen_width, self.screen_height = self.settings_dict["screen_size"]
-        self.FPS = self.settings_dict["FPS"]
+        self.project_title = self.game_dict["project_title"]
+        self.screen_size = self.screen_width, self.screen_height = self.game_dict["screen_size"]
+        self.FPS = self.game_dict["FPS"]
         self.gameDisplay = ScaledGame(self.project_title, self.screen_size, self.FPS)
 
         # Volume Settings
-        self.default_music_volume = self.settings_dict["default_music_volume"]
+        self.default_music_volume = self.game_dict["default_music_volume"]
         self.music_volume = self.default_music_volume
-        self.default_sound_volume = self.settings_dict["default_sound_volume"]
+        self.default_sound_volume = self.game_dict["default_sound_volume"]
         self.sound_volume = self.default_sound_volume
         pygame.mixer.music.set_volume(self.music_volume/100)
 
         # Key Settings
-        self.key_delay, self.key_interval = self.settings_dict["key_repeat"]
+        self.key_delay, self.key_interval = self.game_dict["key_repeat"]
         pygame.key.set_repeat(self.key_delay, self.key_interval)
 
     def new(self):

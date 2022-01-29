@@ -49,8 +49,8 @@ def init_sprite(self, main, group, dict, data, item, parent, variable, action):
         # Settings
         if "settings" in self.object:
             self.settings = self.dict["settings"][self.object["settings"]]
-        elif "settings" in self.dict[self.data]:
-            self.settings = self.dict[self.data]["settings"]
+        elif self.data in self.main.settings_dict:
+            self.settings = self.main.settings_dict[self.data]
         else:
             print("Settings not initialized")
             self.settings = {}

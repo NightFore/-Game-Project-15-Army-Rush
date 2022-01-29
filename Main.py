@@ -16,8 +16,7 @@ class Game:
 
     def load(self):
         self.main_dict = self.main.main_dict
-        self.game_dict = self.main_dict["game"]
-        self.settings_dict = self.game_dict["settings"]
+        self.settings_dict = self.main_dict["settings"]
         self.button_dict = self.main.button_dict
 
     def new(self):
@@ -33,19 +32,18 @@ class Game:
         self.dt = self.main.dt
 
     def new_game(self):
-        self.player = Player(self.main, self.players, self.game_dict)
-        self.enemy = Enemy(self.main, self.players, self.game_dict)
+        self.player = Player(self.main, self.players)
+        self.enemy = Enemy(self.main, self.players)
 
         data = "production"
         # Unit Production
         item = "unit"
         for id in self.main_dict[item]:
-            if isinstance(id, int):
-                sprite = Button(self, self.buttons_unit, self.button_dict, data=data, item=item)
-                sprite.variable = [self.player, id]
+            sprite = Button(self, self.buttons_unit, self.button_dict, data=data, item=item)
+            sprite.variable = [self.player, id]
 
-                # WIP
-                self.main.update_sprite_rect(sprite, 320*(id-1), 650)
+            # WIP
+            self.main.update_sprite_rect(sprite, 320*(id-1), 650)
 
 
     def unit_production(self, args):
@@ -80,7 +78,7 @@ class Game:
         self.main.update_sprite_rect(sprite)
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, main, group, dict, data=None, item=None, parent=None, variable=None, action=None):
+    def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
         init_sprite(self, main, group, dict, data, item, parent, variable, action)
         self.units = pygame.sprite.Group()
 
@@ -118,7 +116,7 @@ class Player(pygame.sprite.Sprite):
         self.game.resources_production(self)
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, main, group, dict, data=None, item=None, parent=None, variable=None, action=None):
+    def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
         init_sprite(self, main, group, dict, data, item, parent, variable, action)
         self.units = pygame.sprite.Group()
 
@@ -163,7 +161,7 @@ class Enemy(pygame.sprite.Sprite):
 
 
 class Unit(pygame.sprite.Sprite):
-    def __init__(self, main, group, dict, data=None, item=None, parent=None, variable=None, action=None):
+    def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
         init_sprite(self, main, group, dict, data, item, parent, variable, action)
         init_sprite_surface(self)
 
@@ -201,7 +199,7 @@ class Unit(pygame.sprite.Sprite):
 
 
 class Castle(pygame.sprite.Sprite):
-    def __init__(self, main, group, dict, data=None, item=None, parent=None, variable=None, action=None):
+    def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
         init_sprite(self, main, group, dict, data, item, parent, variable, action)
         init_sprite_surface(self)
 
@@ -230,22 +228,17 @@ def unit_attack(sprite_1, sprite_2):
 
 
 MAIN_DICT = {
-    # Game Dict
     "game": {
-        "settings": {
-            "project_title": "Army Rush",
-            "screen_size": (1280, 720),
-            "FPS": 60,
-            "key_repeat": (100, 30),
-            "default_music_volume": 5,
-            "default_sound_volume": 75
-        },
+        "project_title": "Army Rush", "screen_size": (1280, 720), "FPS": 60,
+        "default_music_volume": 5, "default_sound_volume": 75,
+        "key_repeat": (100, 30)},
+
+    "settings": {
+        "unit": {"pos": [20, 500], "size": [50, 50], "align": "sw", "vel": vec(50, 0), "acc": vec(0, 0)},
+        "castle": {"pos": [20, 500], "size": [250, 250], "align": "sw"},
     },
 
     "unit": {
-        "settings": {
-            "pos": [20, 500], "size": [50, 50], "vel": vec(50, 0), "acc": vec(0, 0), "align": "sw"
-        },
         1: {"name": "Peasant", "cost_gold": 50, "cost_mana": 0, "cost_supply": 1},
         2: {"name": "Squire", "cost_gold": 100, "cost_mana": 0, "cost_supply": 1},
         3: {"name": "Archer", "cost_gold": 125, "cost_mana": 0, "cost_supply": 1},
@@ -253,9 +246,6 @@ MAIN_DICT = {
     },
 
     "castle": {
-        "settings": {
-            "pos": [20, 500], "size": [250, 250], "align": "sw"
-        },
         1: {},
         2: {}
     },
