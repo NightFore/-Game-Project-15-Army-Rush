@@ -234,13 +234,6 @@ def update_time_dependent(self):
 """
     Sprite (Rect)
 """
-def update_sprite_rect(self, x=None, y=None):
-    if x is None:
-        x = self.pos[0]
-    if y is None:
-        y = self.pos[1]
-    self.pos = [x, y]
-    self.rect = self.main.align_rect(self.surface, (int(self.pos[0]), int(self.pos[1])), self.align)
 
 
 def update_sprite_image(self, image, align=None):
@@ -368,15 +361,6 @@ def collide_hit_rect(one, two):
 """
     Sprite update functions
 """
-def update_move(sprite, dx=None, dy=None):
-    if dx is None and dy is None:
-        sprite.pos += sprite.vel * sprite.game.dt
-        sprite.pos_dt += sprite.vel.x * sprite.game.dt, sprite.vel.y * sprite.game.dt
-    else:
-        sprite.pos.x += dx
-        sprite.pos.y += dy
-    update_rect(sprite)
-
 def update_bobbing(sprite):
     if sprite.bobbing:
         offset = BOB_RANGE * (sprite.tween(sprite.step / BOB_RANGE) - 0.5)

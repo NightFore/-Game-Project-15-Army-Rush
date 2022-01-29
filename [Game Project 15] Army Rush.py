@@ -220,6 +220,14 @@ class Main:
         for sprite in self.all_sprites:
             sprite.kill()
 
+    def update_sprite_rect(self, sprite, x=None, y=None):
+        if x is None:
+            x = sprite.pos[0]
+        if y is None:
+            y = sprite.pos[1]
+        sprite.pos = [x, y]
+        sprite.rect = self.align_rect(sprite.surface, (int(sprite.pos[0]), int(sprite.pos[1])), sprite.align)
+
     def align_rect(self, surface, pos, align):
         rect = surface.get_rect()
         pos = (int(pos[0]), int(pos[1]))

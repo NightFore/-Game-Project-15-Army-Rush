@@ -28,10 +28,11 @@ class Game:
         pass
 
     def update(self):
-        pass
+        self.dt = self.main.dt
 
     def new_game(self):
         self.player = Player(self.main, self.players, self.game_dict)
+        self.enemy = Enemy(self.main, self.players, self.game_dict)
 
         data = "production"
         # Unit Production
@@ -41,7 +42,7 @@ class Game:
             sprite.variable = [self.player, id]
 
             # WIP
-            update_sprite_rect(sprite, 0 + 320*(id-1), 500)
+            self.main.update_sprite_rect(sprite, 0 + 320*(id-1), 500)
 
 
     def unit_production(self, args):
@@ -66,6 +67,14 @@ class Game:
             Unit(self.main, player.units, self.game_dict, data="unit", item=id, parent=player)
         else:
             print("You don't have enough resources!")
+
+    def resources_production(self, player):
+        player.current_gold += player.gain_gold * self.dt
+        player.current_mana += player.gain_mana * self.dt
+
+    def unit_move(self, sprite):
+        sprite.pos += sprite.vel * self.dt
+        self.main.update_sprite_rect(sprite)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, main, group, dict, data=None, item=None, parent=None, variable=None, action=None):
@@ -103,6 +112,50 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         pass
 
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, main, group, dict, data=None, item=None, parent=None, variable=None, action=None):
+        init_sprite(self, main, group, dict, data, item, parent, variable, action)
+        self.units = pygame.sprite.Group()
+
+        # WIP (Update: init_sprite → init_class)
+        self.rect = [0, 0, 0, 0]
+
+    def init(self):
+        # Gold
+        self.current_gold = 250
+        self.gain_gold = 10
+
+        # Mana
+        self.current_mana = 0
+        self.gain_mana = 5
+
+        # Supply
+        self.current_supply = 0
+        self.max_supply = 10
+
+        self.last_wip = pygame.time.get_ticks()
+        self.delay_wip = 500
+
+    def load(self):
+        pass
+
+    def new(self):
+        pass
+
+    def get_keys(self):
+        pass
+
+    def draw(self):
+        pass
+
+    def update(self):
+        self.game.resources_production(self)
+
+        if pygame.time.get_ticks() - self.last_wip >= 2500:
+            print("ok")
+            self.game.unit_production((self, 1))
+            self.last_wip = pygame.time.get_ticks()
+
 
 class Unit(pygame.sprite.Sprite):
     def __init__(self, main, group, dict, data=None, item=None, parent=None, variable=None, action=None):
@@ -110,6 +163,11 @@ class Unit(pygame.sprite.Sprite):
 
     def init(self):
         self.rect = [50, 350, 50, 50]
+        self.pos = self.rect[0], self.rect[1]
+        self.size = self.rect[2], self.rect[3]
+        self.vel = vec(50, 0)
+        self.align = "nw"
+        self.surface = pygame.Surface(self.size)
 
     def load(self):
         pass
@@ -125,6 +183,7 @@ class Unit(pygame.sprite.Sprite):
         pass
 
     def update(self):
+        self.game.unit_move(self)
         """
         if:
             self.check_range()
