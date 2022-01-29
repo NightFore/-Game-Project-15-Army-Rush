@@ -6,9 +6,29 @@ from os import path
 vec = pygame.math.Vector2
 
 """
+    Sprite (Tools)
+"""
+def load_dict_item(self, item, no_item=None):
+    if item in self.object:
+        return self.object[item]
+    elif item in self.settings:
+        return self.settings[item]
+    else:
+        return no_item
+
+
+"""
     Sprite (Initialization)
 """
 def init_sprite(self, main, group, dict, data, item, parent, variable, action):
+    """
+    main, game
+    groups, group
+    dict, data, item
+    object, settings,
+    parent, variable, action
+    """
+
     # Classes
     self.main = main.main
     self.game = self.main.game
@@ -45,15 +65,12 @@ def init_sprite(self, main, group, dict, data, item, parent, variable, action):
     self.new()
 
 
-def load_dict_item(self, item, no_item=None):
-    if item in self.object:
-        return self.object[item]
-    elif item in self.settings:
-        return self.settings[item]
-    else:
-        return no_item
-
 def init_sprite_text(self, text=None):
+    """
+    text, text_pos, text_align
+    font, font_color
+    """
+
     # Text
     self.text = text if text is not None else load_dict_item(self, "text", None)
     self.text_pos = load_dict_item(self, "text_pos", [self.rect[0] + self.rect[2] // 2, self.rect[1] + self.rect[3] // 2])
@@ -70,35 +87,24 @@ def init_sprite_text(self, text=None):
         print("Font color not initialized")
 
 
-
 """
     Sprite (Surface)
 """
 def init_sprite_surface(self):
-    if "pos" in self.object:
-        self.pos = self.object["pos"].copy()
-    if "pos" in self.settings:
-        self.pos = self.settings["pos"].copy()
-    if "align" in self.object:
-        self.align = self.object["align"]
-    if "align" in self.settings:
-        self.align = self.settings["align"]
-    if "size" in self.object:
-        self.size = self.object["size"]
-    if "size" in self.settings:
-        self.size = self.settings["size"]
-    if "border_size" in self.object:
-        self.border_size = self.object["border_size"]
-    if "border_size" in self.settings:
-        self.border_size = self.settings["border_size"]
-    if "color" in self.object:
-        self.color = self.object["color"]
-    if "color" in self.settings:
-        self.color = self.settings["color"]
-    if "border_color" in self.object:
-        self.border_color = self.object["border_color"]
-    if "border_color" in self.settings:
-        self.border_color = self.settings["border_color"]
+    """
+    pos, align, size, color
+    border_size, border_color
+    surface, surface_rect, rect
+    """
+
+    self.pos = load_dict_item(self, "pos").copy()
+    self.align = load_dict_item(self, "align")
+    self.size = load_dict_item(self, "size")
+    self.color = load_dict_item(self, "color")
+
+    self.border_size = load_dict_item(self, "border_size")
+    self.border_color = load_dict_item(self, "border_color")
+
     self.surface = pygame.Surface(self.size)
     self.surface_rect = (self.border_size[0], self.border_size[1], self.size[0] - 2*self.border_size[0], self.size[1] - 2*self.border_size[1])
     self.rect = self.main.align_rect(self.surface, self.pos, self.align)
