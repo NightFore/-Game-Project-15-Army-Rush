@@ -7,12 +7,10 @@ vec = pygame.math.Vector2
 
 class Button(pygame.sprite.Sprite):
     def __init__(self, main, group, dict, data, item, parent=None, variable=None, action=None):
-        # Initialization -------------- #
-        init_sprite(self, main, group, dict, data, item, parent, variable, action)
+        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True, text=True)
 
     def init(self):
-        init_sprite_surface(self)
-        init_sprite_text(self)
+        pass
 
     def load(self):
         # Image

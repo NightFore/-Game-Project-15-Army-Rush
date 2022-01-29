@@ -16,10 +16,23 @@ def load_dict_item(self, item, no_item=None):
     else:
         return no_item
 
+"""
+    Initialization
+"""
+def init_class(self, main, group, dict, data, item, parent, variable, action, surface=False, text=False):
+    # Sprite Initialization
+    init_sprite(self, main, group, dict, data, item, parent, variable, action)
+    if surface:
+        init_sprite_surface(self)
+    if text:
+        init_sprite_text(self)
 
-"""
-    Sprite (Initialization)
-"""
+    # Class Initialization
+    self.init()
+    self.load()
+    self.new()
+
+
 def init_sprite(self, main, group, dict, data, item, parent, variable, action):
     """
     main, game
@@ -59,11 +72,6 @@ def init_sprite(self, main, group, dict, data, item, parent, variable, action):
     self.parent = parent
     self.variable = variable
     self.action = action
-
-    # Initialization
-    self.init()
-    self.load()
-    self.new()
 
 
 def init_sprite_text(self, text=None):

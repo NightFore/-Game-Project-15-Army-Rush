@@ -32,8 +32,8 @@ class Game:
         self.dt = self.main.dt
 
     def new_game(self):
-        self.player = Player(self.main, self.players)
-        self.enemy = Enemy(self.main, self.players)
+        self.player = Player(self.main, self.players, self.main_dict, data="players", item=1)
+        self.enemy = Enemy(self.main, self.players, self.main_dict, data="players", item=2)
 
         data = "production"
         # Unit Production
@@ -77,17 +77,16 @@ class Game:
         sprite.pos += sprite.vel * self.dt
         self.main.update_sprite_rect(sprite)
 
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
-        init_sprite(self, main, group, dict, data, item, parent, variable, action)
-        self.units = pygame.sprite.Group()
-
-        # WIP (Update: init_sprite → init_class)
-        self.rect = [0, 0, 0, 0]
+        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
 
     def init(self):
-        self.castle = Castle(self.main, self.game.castles, self.main.main_dict, data="castle", item=1, parent=self)
+        self.units = pygame.sprite.Group()
+        self.castle = Castle(self.main, self.game.castles, self.main.main_dict, data="castle", item=self.item, parent=self)
 
+    def load(self):
         # Gold
         self.current_gold = 250
         self.gain_gold = 1
@@ -100,13 +99,7 @@ class Player(pygame.sprite.Sprite):
         self.current_supply = 0
         self.max_supply = 10
 
-    def load(self):
-        pass
-
     def new(self):
-        pass
-
-    def get_keys(self):
         pass
 
     def draw(self):
@@ -117,13 +110,13 @@ class Player(pygame.sprite.Sprite):
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
-        init_sprite(self, main, group, dict, data, item, parent, variable, action)
-        self.units = pygame.sprite.Group()
-
-        # WIP (Update: init_sprite → init_class)
-        self.rect = [0, 0, 0, 0]
+        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
 
     def init(self):
+        self.units = pygame.sprite.Group()
+        self.castle = Castle(self.main, self.game.castles, self.main.main_dict, data="castle", item=self.item, parent=self)
+
+    def load(self):
         # Gold
         self.current_gold = 250
         self.gain_gold = 10
@@ -136,17 +129,8 @@ class Enemy(pygame.sprite.Sprite):
         self.current_supply = 0
         self.max_supply = 10
 
-        self.last_wip = pygame.time.get_ticks()
-        self.delay_wip = 500
-
-    def load(self):
-        pass
-
     def new(self):
-        pass
-
-    def get_keys(self):
-        pass
+        self.last_spawn = pygame.time.get_ticks()
 
     def draw(self):
         pass
@@ -154,19 +138,17 @@ class Enemy(pygame.sprite.Sprite):
     def update(self):
         self.game.resources_production(self)
 
-        if pygame.time.get_ticks() - self.last_wip >= 2500:
-            print("ok")
-            self.game.unit_production((self, 1))
-            self.last_wip = pygame.time.get_ticks()
+        if pygame.time.get_ticks() - self.last_spawn >= 2500:
+            self.game.unit_production((self, self.item))
+            self.last_spawn = pygame.time.get_ticks()
 
 
 class Unit(pygame.sprite.Sprite):
     def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
-        init_sprite(self, main, group, dict, data, item, parent, variable, action)
-        init_sprite_surface(self)
+        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
 
     def init(self):
-        pass
+        self.main.update_sprite_rect(self, self.parent.pos[0], self.parent.pos[1])
 
     def load(self):
         pass
@@ -200,11 +182,10 @@ class Unit(pygame.sprite.Sprite):
 
 class Castle(pygame.sprite.Sprite):
     def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
-        init_sprite(self, main, group, dict, data, item, parent, variable, action)
-        init_sprite_surface(self)
+        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
 
     def init(self):
-        pass
+        self.main.update_sprite_rect(self, self.parent.pos[0], self.parent.pos[1])
 
     def load(self):
         pass
@@ -219,14 +200,6 @@ class Castle(pygame.sprite.Sprite):
         pass
 
 
-def unit_attack(sprite_1, sprite_2):
-    sprite_2 -= sprite_1.attack
-    if sprite_2.health <= 0:
-        if sprite_1.parent == self.game.player:
-            self.game.player += sprite_2.gain_experience
-        sprite_2.kill()
-
-
 MAIN_DICT = {
     "game": {
         "project_title": "Army Rush", "screen_size": (1280, 720), "FPS": 60,
@@ -234,8 +207,18 @@ MAIN_DICT = {
         "key_repeat": (100, 30)},
 
     "settings": {
-        "unit": {"pos": [20, 500], "size": [50, 50], "align": "sw", "vel": vec(50, 0), "acc": vec(0, 0)},
-        "castle": {"pos": [20, 500], "size": [250, 250], "align": "sw"},
+        "unit": {"size": [50, 50], "align": "sw", "vel": vec(50, 0), "acc": vec(0, 0)},
+        "castle": {"size": [250, 250], "align": "sw"},
+    },
+
+    "players": {
+        1: {"pos": [20, 500], "align": "sw"},
+        2: {"pos": [1210, 500], "align": "se"},
+    },
+
+    "castle": {
+        1: {},
+        2: {}
     },
 
     "unit": {
@@ -243,11 +226,6 @@ MAIN_DICT = {
         2: {"name": "Squire", "cost_gold": 100, "cost_mana": 0, "cost_supply": 1},
         3: {"name": "Archer", "cost_gold": 125, "cost_mana": 0, "cost_supply": 1},
         4: {"name": "Priest", "cost_gold": 150, "cost_mana": 25, "cost_supply": 1},
-    },
-
-    "castle": {
-        1: {},
-        2: {}
     },
 
 
