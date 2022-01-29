@@ -49,8 +49,6 @@ def init_sprite(self, main, group, dict, data, item, parent, variable, action):
         # Settings
         if "settings" in self.object:
             self.settings = self.dict["settings"][self.object["settings"]]
-        elif self.data in self.dict["settings"]:
-            self.settings = self.dict["settings"][self.data]
         else:
             self.settings = {}
 
@@ -92,17 +90,17 @@ def init_sprite_text(self, text=None):
 """
 def init_sprite_surface(self):
     """
-    pos, align, size, color
+    pos, size, align, color
     border_size, border_color
     surface, surface_rect, rect
     """
 
-    self.pos = load_dict_item(self, "pos").copy()
-    self.align = load_dict_item(self, "align")
-    self.size = load_dict_item(self, "size")
+    self.pos = load_dict_item(self, "pos", [0, 0]).copy()
+    self.size = load_dict_item(self, "size", [0, 0])
+    self.align = load_dict_item(self, "align", "center")
     self.color = load_dict_item(self, "color")
 
-    self.border_size = load_dict_item(self, "border_size")
+    self.border_size = load_dict_item(self, "border_size", [0, 0])
     self.border_color = load_dict_item(self, "border_color")
 
     self.surface = pygame.Surface(self.size)

@@ -15,7 +15,8 @@ class Game:
         self.new()
 
     def load(self):
-        self.game_dict = self.main.main_dict["game"]
+        self.main_dict = self.main.main_dict
+        self.game_dict = self.main_dict["game"]
         self.settings_dict = self.game_dict["settings"]
         self.button_dict = self.main.button_dict
 
@@ -37,7 +38,7 @@ class Game:
         data = "production"
         # Unit Production
         item = "unit"
-        for id in self.game_dict[item]:
+        for id in self.main_dict[item]:
             sprite = Button(self, self.buttons_unit, self.button_dict, data=data, item=item)
             sprite.variable = [self.player, id]
 
@@ -51,7 +52,7 @@ class Game:
         """
         player = args[0]
         id = args[1]
-        unit = self.game_dict["unit"][id]
+        unit = self.main_dict["unit"][id]
 
         # Check resources
         check_gold = player.current_gold >= unit["cost_gold"]
@@ -64,7 +65,7 @@ class Game:
             player.current_gold -= unit["cost_gold"]
             player.current_mana -= unit["cost_mana"]
             player.current_supply += unit["cost_supply"]
-            Unit(self.main, player.units, self.game_dict, data="unit", item=id, parent=player)
+            Unit(self.main, player.units, self.main_dict, data="unit", item=id, parent=player)
         else:
             print("You don't have enough resources!")
 
@@ -162,6 +163,7 @@ class Unit(pygame.sprite.Sprite):
         init_sprite(self, main, group, dict, data, item, parent, variable, action)
 
     def init(self):
+        init_sprite_surface(self)
         self.rect = [50, 350, 50, 50]
         self.pos = self.rect[0], self.rect[1]
         self.size = self.rect[2], self.rect[3]
@@ -225,13 +227,13 @@ MAIN_DICT = {
             "default_music_volume": 5,
             "default_sound_volume": 75
         },
+    },
 
-        "unit": {
-            1: {"name": "Peasant", "cost_gold": 50, "cost_mana": 0, "cost_supply": 1},
-            2: {"name": "Squire", "cost_gold": 100, "cost_mana": 0, "cost_supply": 1},
-            3: {"name": "Archer", "cost_gold": 125, "cost_mana": 0, "cost_supply": 1},
-            4: {"name": "Priest", "cost_gold": 150, "cost_mana": 25, "cost_supply": 1},
-        }
+    "unit": {
+        1: {"name": "Peasant", "cost_gold": 50, "cost_mana": 0, "cost_supply": 1},
+        2: {"name": "Squire", "cost_gold": 100, "cost_mana": 0, "cost_supply": 1},
+        3: {"name": "Archer", "cost_gold": 125, "cost_mana": 0, "cost_supply": 1},
+        4: {"name": "Priest", "cost_gold": 150, "cost_mana": 25, "cost_supply": 1},
     },
 
 
