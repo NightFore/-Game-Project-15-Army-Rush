@@ -45,48 +45,29 @@ def init_sprite(self, main, group, dict, data, item, parent, variable, action):
     self.new()
 
 
+def load_dict_item(self, item, no_item=None):
+    if item in self.object:
+        return self.object[item]
+    elif item in self.settings:
+        return self.settings[item]
+    else:
+        return no_item
+
 def init_sprite_text(self, text=None):
     # Text
-    if text is not None:
-        self.text = text
-    elif "text" in self.object:
-        self.text = self.object["text"]
-    elif "text" in self.settings:
-        self.text = self.settings["text"]
-    else:
-        self.text = None
-
-    # Position
-    if "text_pos" in self.object:
-        self.text_pos = self.object["text_pos"]
-    if "text_pos" in self.settings:
-        self.text_pos = self.settings["text_pos"]
-    else:
-        self.text_pos = [self.rect[0] + self.rect[2] // 2, self.rect[1] + self.rect[3] // 2]
-
-    # Align
-    if "text_align" in self.object:
-        self.text_align = self.object["text_align"]
-    if "text_align" in self.settings:
-        self.text_align = self.settings["text_align"]
-    else:
-        self.text_align = self.align
+    self.text = text if text is not None else load_dict_item(self, "text", None)
+    self.text_pos = load_dict_item(self, "text_pos", [self.rect[0] + self.rect[2] // 2, self.rect[1] + self.rect[3] // 2])
+    self.text_align = load_dict_item(self, "text_align", self.align)
 
     # Font
-    if "font" in self.object:
-        self.font = self.main.font_dict[self.object["font"]]
-    if "font" in self.settings:
-        self.font = self.main.font_dict[self.settings["font"]]
-    else:
-        self.font = None
-        print("Font not initialized")
+    self.font = self.main.font_dict[load_dict_item(self, "font", None)]
+    self.font_color = load_dict_item(self, "font_color", None)
 
-    # Font color
-    if "font_color" in self.settings:
-        self.font_color = self.settings["font_color"]
-    else:
-        self.font_color = None
-        print("Color not initialized")
+    # Check
+    if self.font is None:
+        print("Font not initialized")
+    if self.font_color is None:
+        print("Font color not initialized")
 
 
 
