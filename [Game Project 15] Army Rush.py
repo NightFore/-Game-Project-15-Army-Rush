@@ -103,6 +103,10 @@ class Main:
             self.events()
             if not self.paused:
                 self.update()
+            else:
+                for button in self.game.buttons:
+                    if button.item == "pause":
+                        button.update()
             self.draw()
         self.quit_game()
 
@@ -110,8 +114,37 @@ class Main:
         pygame.quit()
         quit()
 
-    def pause_game(self):
-        pass
+    def pause_game(self, pause=None, pause_check=False):
+        # Keyboard Pause
+        if pause_check:
+            # Pause
+            if pause:
+                self.paused = True
+                pygame.mixer.music.pause()
+
+            # Unpause
+            elif self.pause_check:
+                self.pause_check = False
+                self.paused = False
+                pygame.mixer.music.unpause()
+            else:
+                self.pause_check = True
+
+        # Click Pause
+        elif not pause_check:
+            # Pause
+            pause = not self.paused if pause is None else pause
+            if pause:
+                self.pause_check = True
+                self.paused = True
+                pygame.mixer.music.pause()
+
+            # Unpause
+            else:
+                self.pause_check = False
+                self.paused = False
+                pygame.mixer.music.unpause()
+
 
     def events(self):
         # Click: Left, Middle, Right, Scroll Up, Scroll Down
@@ -137,21 +170,15 @@ class Main:
                     # Quit Game (Escape)
                     self.quit_game()
                 if event.key == pygame.K_p:
-                    # Pause
-                    self.paused = True
-                    pygame.mixer.music.pause()
+                    # Pause Game
+                    self.pause_game(True, pause_check=True)
                 if event.key == pygame.K_h:
                     # Debug Mode
                     self.debug_mode = not self.debug_mode
             if event.type == pygame.KEYUP:
+                    # Unpause Game
                 if event.key == pygame.K_p:
-                    # Unpause
-                    if not self.pause_check:
-                        self.pause_check = True
-                    else:
-                        self.pause_check = False
-                        self.paused = False
-                        pygame.mixer.music.unpause()
+                    self.pause_game(False, pause_check=True)
 
             # Quit Game (Close Button)
             if event.type == pygame.QUIT:
