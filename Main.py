@@ -269,20 +269,25 @@ class Castle(pygame.sprite.Sprite):
 
 
 MAIN_DICT = {
+    # Init (Settings) ----------------- #
     "game": {
         "project_title": "Army Rush", "screen_size": (1280, 720), "FPS": 60,
         "default_music_volume": 5, "default_sound_volume": 75,
         "key_repeat": (100, 30)},
 
+
+    # Game (Settings) ----------------- #
     "settings": {
-        "interface_box": {"size": [180, 50], "border_size": [6, 6], "align": "nw", "text_align": "center",
-                          "color": DARKGREY, "border_color": LIGHTSKYGREY,
-                          "font": "LiberationSerif_30", "font_color": WHITE},
+        "interface_box": {"size": [180, 50], "border_size": [6, 6], "align": "nw",
+                          "font": "LiberationSerif_30", "text_align": "center",
+                          "color": DARKGREY, "border_color": LIGHTSKYGREY, "font_color": WHITE},
         "players": {},
         "unit": {"size": [50, 50], "align": "sw", "vel": [50, 0], "acc": [0, 0]},
         "castle": {"size": [250, 250], "align": "sw"},
     },
 
+
+    # Game (Interface) ---------------- #
     "interface_box": {
         1: {"pos": [390, 10]},
         2: {"pos": [710, 10]},
@@ -290,16 +295,22 @@ MAIN_DICT = {
         4: {"pos": [1090, 10]},
     },
 
+
+    # Game (Player) ------------------- #
     "players": {
         1: {"pos": [20, 500], "vel": [1, 0], "align": "sw"},
         2: {"pos": [1260, 500], "vel": [-1, 0], "align": "se"},
     },
 
+
+    # Game (Castle) ------------------- #
     "castle": {
         1: {},
         2: {}
     },
 
+
+    # Game (Unit) --------------------- #
     "unit": {
         1: {"name": "Peasant", "cost_gold": 50, "cost_mana": 0, "cost_supply": 1},
         2: {"name": "Squire", "cost_gold": 100, "cost_mana": 0, "cost_supply": 1},
@@ -308,7 +319,7 @@ MAIN_DICT = {
     },
 
 
-    # Background Dict
+    # Background Dict ----------------- #
     "background": {
         None: None,
         "default": {
@@ -318,18 +329,18 @@ MAIN_DICT = {
     },
 
 
-    # Music Dict
+    # Music Dict ---------------------- #
     "music": {
         "default": None,
     },
 
 
-    # Sound Dict
+    # Sound Dict ---------------------- #
     "sound": {
     },
 
 
-    # Font Dict
+    # Font Dict ----------------------- #
     "font": {
         "default": {"ttf": None, "size": 100},
         "LiberationSerif": {"ttf": "LiberationSerif-Regular.ttf", "size": 40},
@@ -337,7 +348,7 @@ MAIN_DICT = {
     },
 
 
-    # Menu Dict
+    # Menu Dict ----------------------- #
     "menu": {
         "main_menu": {
             "background": "default",
@@ -354,29 +365,25 @@ MAIN_DICT = {
     },
 
 
-    # Button Dict
+    # Button Dict --------------------- #
     "button": {
         "settings": {
             "default": {
-                "align": "nw", "size": (280, 50),
-                "border": True, "border_size": (5, 5), "border_color": BLACK,
-                "text_align": "center", "font": "LiberationSerif", "font_color": WHITE,
-                "inactive_color": LIGHT_SKY_BLUE, "active_color": DARK_SKY_BLUE,
+                "size": (280, 50), "border_size": (5, 5), "align": "nw",
+                "font": "LiberationSerif", "font_color": WHITE, "text_align": "center",
+                "inactive_color": LIGHT_SKY_BLUE, "active_color": DARK_SKY_BLUE, "border_color": BLACK,
                 "sound_action": None, "sound_active": None, "sound_inactive": None},
             "production": {
-                "align": "nw", "size": (320, 50),
-                "border": True, "border_size": (5, 5), "border_color": BLACK,
-                "text_align": "center", "font": "LiberationSerif", "font_color": WHITE,
-                "inactive_color": LIGHT_SKY_BLUE, "active_color": DARK_SKY_BLUE,
+                "size": (320, 50), "border_size": (5, 5), "align": "nw",
+                "font": "LiberationSerif", "font_color": WHITE, "text_align": "center",
+                "inactive_color": LIGHT_SKY_BLUE, "active_color": DARK_SKY_BLUE, "border_color": BLACK,
                 "sound_action": None, "sound_active": None, "sound_inactive": None},
             "interface": {
                 "size": (180, 50), "border_size": (6, 6), "align": "nw",
-                "text_align": "center", "font": "LiberationSerif_30", "font_color": WHITE,
+                "font": "LiberationSerif_30", "font_color": WHITE, "text_align": "center",
                 "border_color": DARKSKYGREY, "inactive_color": DARKGREY, "active_color": LIGHTGREY,
-                "border": True, "sound_action": None, "sound_active": None, "sound_inactive": None},
+                "sound_action": None, "sound_active": None, "sound_inactive": None},
         },
-        "interface_box": {"size": [180, 50], "border_size": [6, 6], "align": "nw",
-                          "text_align": "center", "font": "LiberationSerif_30", "font_color": WHITE},
         "main_menu": {
             "new_game": {"settings": "default", "pos": [10, 70], "text": "New Game", "action": "self.game.new_game"},
         },
