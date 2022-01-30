@@ -104,7 +104,10 @@ class Game:
                 for enemy in collided:
                     enemy.current_health -= unit.attack
                     if enemy.current_health <= 0:
+                        enemy.parent.current_supply -= enemy.cost_supply
                         enemy.kill()
+                        if unit.parent == self.player:
+                            self.player.gain_exp += enemy.gain_exp
             return True
         return False
 
@@ -144,7 +147,7 @@ class Player(pygame.sprite.Sprite):
 
         # Experience
         self.current_exp = 0
-        self.gain_exp = 10000
+        self.gain_exp = 0
 
     def load_interface(self):
         # Initialization
@@ -251,12 +254,15 @@ class Unit(pygame.sprite.Sprite):
         init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
 
     def init(self):
-        print(self.size)
         self.vel.x *= self.parent.vel.x
         self.align = self.parent.align
         self.main.update_sprite_rect(self, self.parent.pos[0], self.parent.pos[1])
 
     def load(self):
+        self.name = self.object["name"]
+        self.gain_exp = self.object["gain_exp"]
+        self.cost_supply = self.object["cost_supply"]
+
         self.max_health = self.object["max_health"]
         self.current_health = self.max_health
 
@@ -356,21 +362,25 @@ MAIN_DICT = {
 
     # Game (Unit) --------------------- #
     "unit": {
-        1: {"name": "Peasant", "size": [50, 50],
+        1: {"name": "Scout", "size": [50, 50], "vel": [200, 0],
             "cost_gold": 50, "cost_mana": 0, "cost_supply": 1,
-            "max_health": 25, "attack": 5, "delay_attack": 2500},
+            "max_health": 25, "attack": 5, "delay_attack": 2500,
+            "gain_exp": 10},
 
-        2: {"name": "Squire", "size": [70, 100],
+        2: {"name": "Squire", "size": [70, 100], "vel": [125, 0],
             "cost_gold": 100, "cost_mana": 0, "cost_supply": 1,
-            "max_health": 100, "attack": 10, "delay_attack": 1000},
+            "max_health": 100, "attack": 10, "delay_attack": 1000,
+            "gain_exp": 25},
 
-        3: {"name": "Archer", "size": [40, 60],
-            "cost_gold": 125, "cost_mana": 0, "cost_supply": 1,
-            "max_health": 65, "attack": 8, "delay_attack": 2000},
+        3: {"name": "Archer", "size": [40, 60], "vel": [90, 0],
+            "cost_gold": 125, "cost_mana": 5, "cost_supply": 1,
+            "max_health": 65, "attack": 8, "delay_attack": 2000,
+            "gain_exp": 30},
 
-        4: {"name": "Priest", "size": [50, 70],
+        4: {"name": "Priest", "size": [50, 70], "vel": [25, 0],
             "cost_gold": 150, "cost_mana": 25, "cost_supply": 1,
-            "max_health": 50, "attack": 5, "delay_attack": 1500},
+            "max_health": 50, "attack": 5, "delay_attack": 1500,
+            "gain_exp": 40},
     },
 
 
