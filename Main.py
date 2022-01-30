@@ -103,6 +103,8 @@ class Game:
                 unit.last_attack = pygame.time.get_ticks()
                 for enemy in collided:
                     enemy.current_health -= unit.attack
+                    if enemy.current_health <= 0:
+                        enemy.kill()
             return True
         return False
 
@@ -249,16 +251,18 @@ class Unit(pygame.sprite.Sprite):
         init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
 
     def init(self):
+        print(self.size)
         self.vel.x *= self.parent.vel.x
         self.align = self.parent.align
         self.main.update_sprite_rect(self, self.parent.pos[0], self.parent.pos[1])
 
     def load(self):
-        # WIP
-        self.current_health = 10
-        self.attack = 1
+        self.max_health = self.object["max_health"]
+        self.current_health = self.max_health
+
+        self.attack = self.object["attack"]
+        self.delay_attack = self.object["delay_attack"]
         self.last_attack = pygame.time.get_ticks()
-        self.delay_attack = 1000
 
     def new(self):
         pass
@@ -352,10 +356,21 @@ MAIN_DICT = {
 
     # Game (Unit) --------------------- #
     "unit": {
-        1: {"name": "Peasant", "cost_gold": 50, "cost_mana": 0, "cost_supply": 1},
-        2: {"name": "Squire", "cost_gold": 100, "cost_mana": 0, "cost_supply": 1},
-        3: {"name": "Archer", "cost_gold": 125, "cost_mana": 0, "cost_supply": 1},
-        4: {"name": "Priest", "cost_gold": 150, "cost_mana": 25, "cost_supply": 1},
+        1: {"name": "Peasant", "size": [50, 50],
+            "cost_gold": 50, "cost_mana": 0, "cost_supply": 1,
+            "max_health": 25, "attack": 5, "delay_attack": 2500},
+
+        2: {"name": "Squire", "size": [70, 100],
+            "cost_gold": 100, "cost_mana": 0, "cost_supply": 1,
+            "max_health": 100, "attack": 10, "delay_attack": 1000},
+
+        3: {"name": "Archer", "size": [40, 60],
+            "cost_gold": 125, "cost_mana": 0, "cost_supply": 1,
+            "max_health": 65, "attack": 8, "delay_attack": 2000},
+
+        4: {"name": "Priest", "size": [50, 70],
+            "cost_gold": 150, "cost_mana": 25, "cost_supply": 1,
+            "max_health": 50, "attack": 5, "delay_attack": 1500},
     },
 
 
