@@ -100,6 +100,10 @@ class Player(pygame.sprite.Sprite):
         self.current_supply = 0
         self.max_supply = 10
 
+        # Experience
+        self.current_exp = 0
+        self.gain_exp = 10000
+
     def load_interface(self):
         # Initialization
         self.ui_data = "interface_box"
@@ -117,35 +121,48 @@ class Player(pygame.sprite.Sprite):
         self.ui_font = self.main.font_dict[self.ui_settings["font"]]
         self.ui_font_color = self.ui_settings["font_color"]
 
-        # Gold
+        data = "interface"
+        for item in self.game.button_dict[data]:
+            Button(self, self.game.buttons, self.game.button_dict, data=data, item=item)
+
+        # Experience
         ui_item = 1
         ui_object = self.dict[self.ui_data][ui_item]
         ui_pos = ui_object["pos"]
         self.ui_rect_1 = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
         self.ui_text_pos_1 = init_sprite_text_rect(self.ui_rect_1)
 
-        # Mana
+        # Gold
         ui_item = 2
         ui_object = self.dict[self.ui_data][ui_item]
         ui_pos = ui_object["pos"]
         self.ui_rect_2 = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
         self.ui_text_pos_2 = init_sprite_text_rect(self.ui_rect_2)
 
-        # Supply
+        # Mana
         ui_item = 3
         ui_object = self.dict[self.ui_data][ui_item]
         ui_pos = ui_object["pos"]
         self.ui_rect_3 = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
         self.ui_text_pos_3 = init_sprite_text_rect(self.ui_rect_3)
 
+        # Supply
+        ui_item = 4
+        ui_object = self.dict[self.ui_data][ui_item]
+        ui_pos = ui_object["pos"]
+        self.ui_rect_4 = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
+        self.ui_text_pos_4 = init_sprite_text_rect(self.ui_rect_4)
+
 
     def draw_interface(self):
-        self.main.draw_surface(self.ui_align, self.ui_rect_1, self.ui_color, self.ui_border_size, self.ui_border_color)
-        self.main.draw_surface(self.ui_align, self.ui_rect_2, self.ui_color, self.ui_border_size, self.ui_border_color)
-        self.main.draw_surface(self.ui_align, self.ui_rect_3, self.ui_color, self.ui_border_size, self.ui_border_color)
-        self.main.draw_text("Gold: %i" % self.current_gold, self.ui_font, self.ui_font_color, self.ui_text_pos_1, self.ui_text_align)
-        self.main.draw_text("Mana: %i" % self.current_mana, self.ui_font, self.ui_font_color, self.ui_text_pos_2, self.ui_text_align)
-        self.main.draw_text("Supply: %i/%i" % (self.current_supply, self.max_supply), self.ui_font, self.ui_font_color, self.ui_text_pos_3, self.ui_text_align)
+        self.main.draw_surface(self.ui_rect_1, self.ui_color, self.ui_border_size, self.ui_border_color, self.ui_align)
+        self.main.draw_surface(self.ui_rect_2, self.ui_color, self.ui_border_size, self.ui_border_color, self.ui_align)
+        self.main.draw_surface(self.ui_rect_3, self.ui_color, self.ui_border_size, self.ui_border_color, self.ui_align)
+        self.main.draw_surface(self.ui_rect_4, self.ui_color, self.ui_border_size, self.ui_border_color, self.ui_align)
+        self.main.draw_text("EXP: %i" % self.gain_exp, self.ui_font, self.ui_font_color, self.ui_text_pos_1, self.ui_text_align)
+        self.main.draw_text("Gold: %i" % self.current_gold, self.ui_font, self.ui_font_color, self.ui_text_pos_2, self.ui_text_align)
+        self.main.draw_text("Mana: %i" % self.current_mana, self.ui_font, self.ui_font_color, self.ui_text_pos_3, self.ui_text_align)
+        self.main.draw_text("Supply: %i/%i" % (self.current_supply, self.max_supply), self.ui_font, self.ui_font_color, self.ui_text_pos_4, self.ui_text_align)
 
     def new(self):
         pass
@@ -267,9 +284,10 @@ MAIN_DICT = {
     },
 
     "interface_box": {
-        1: {"pos": [710, 10]},
-        2: {"pos": [900, 10]},
-        3: {"pos": [1090, 10]},
+        1: {"pos": [390, 10]},
+        2: {"pos": [710, 10]},
+        3: {"pos": [900, 10]},
+        4: {"pos": [1090, 10]},
     },
 
     "players": {
@@ -345,20 +363,29 @@ MAIN_DICT = {
                 "text_align": "center", "font": "LiberationSerif", "font_color": WHITE,
                 "inactive_color": LIGHT_SKY_BLUE, "active_color": DARK_SKY_BLUE,
                 "sound_action": None, "sound_active": None, "sound_inactive": None},
-            "icon": {
+            "production": {
                 "align": "nw", "size": (320, 50),
                 "border": True, "border_size": (5, 5), "border_color": BLACK,
                 "text_align": "center", "font": "LiberationSerif", "font_color": WHITE,
                 "inactive_color": LIGHT_SKY_BLUE, "active_color": DARK_SKY_BLUE,
                 "sound_action": None, "sound_active": None, "sound_inactive": None},
+            "interface": {
+                "size": (180, 50), "border_size": (6, 6), "align": "nw",
+                "text_align": "center", "font": "LiberationSerif_30", "font_color": WHITE,
+                "border_color": DARKSKYGREY, "inactive_color": DARKGREY, "active_color": LIGHTGREY,
+                "border": True, "sound_action": None, "sound_active": None, "sound_inactive": None},
         },
+        "interface_box": {"size": [180, 50], "border_size": [6, 6], "align": "nw",
+                          "text_align": "center", "font": "LiberationSerif_30", "font_color": WHITE},
         "main_menu": {
-            "new_game": {"settings": "default", "pos": [20, 20], "text": "New Game", "action": "self.game.new_game"},
-            "Test": {"settings": "default", "pos": [20, 90], "text": "Test", "action": None},
-            "exit": {"settings": "default", "pos": [20, 160], "text": "Exit", "action": "self.main.quit_game"},
+            "new_game": {"settings": "default", "pos": [10, 70], "text": "New Game", "action": "self.game.new_game"},
         },
         "production": {
-            "unit": {"settings": "icon", "pos": [0, 0], "action": "self.game.unit_production"},
+            "unit": {"settings": "production", "pos": [0, 0], "action": "self.game.unit_production"},
+        },
+        "interface": {
+            "quit": {"settings": "interface", "pos": [10, 10], "text": "Quit", "action": "self.main.quit_game"},
+            "pause": {"settings": "interface", "pos": [200, 10], "text": "Pause", "action": "self.main.pause_game"},
         }
     },
 }

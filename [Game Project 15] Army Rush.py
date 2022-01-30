@@ -110,6 +110,9 @@ class Main:
         pygame.quit()
         quit()
 
+    def pause_game(self):
+        pass
+
     def events(self):
         # Click: Left, Middle, Right, Scroll Up, Scroll Down
         self.click = [None, False, False, False, False, False]
@@ -261,7 +264,7 @@ class Main:
             if self.debug_mode:
                 pygame.draw.rect(self.gameDisplay, CYAN, text_rect, 1)
 
-    def draw_surface(self, align, rect, color, border_size=[0, 0], border_color=None):
+    def draw_surface(self, rect, color, border_size=[0, 0], border_color=None, align="center"):
         # Initialization
         x, y, w, h = int(rect[0]), int(rect[1]), int(rect[2]), int(rect[3])
         border_w, border_h = border_size[0], border_size[1]
