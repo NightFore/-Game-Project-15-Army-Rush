@@ -80,13 +80,10 @@ class Game:
 
         # Production
         if check_gold and check_mana and check_supply:
-            print("%s have been produced!" % unit["name"])
             player.current_gold -= unit["cost_gold"]
             player.current_mana -= unit["cost_mana"]
             player.current_supply += unit["cost_supply"]
             Unit(self.main, player.units, self.main_dict, data="unit", item=id, parent=player)
-        else:
-            print("You don't have enough resources!")
 
     def resources_production(self, player):
         player.current_gold += player.gain_gold * self.dt
@@ -97,8 +94,8 @@ class Game:
         self.main.update_sprite_rect(sprite)
 
     def unit_attack(self, unit, enemies, castle):
-        collided = collide_rect_sprites(unit.rect, enemies)
-        collided_castle = unit.rect.colliderect(castle.rect) and castle.current_health > 0
+        collided = collide_rect_sprites(unit.hit_rect, enemies)
+        collided_castle = unit.hit_rect.colliderect(castle.rect) and castle.current_health > 0
         if collided or collided_castle:
             if pygame.time.get_ticks() - unit.last_attack >= unit.delay_attack:
                 unit.last_attack = pygame.time.get_ticks()
@@ -280,6 +277,11 @@ class Unit(pygame.sprite.Sprite):
         self.delay_attack = self.object["delay_attack"]
         self.last_attack = pygame.time.get_ticks()
 
+        # Debug Range
+        self.range = self.object["range"]
+        self.hit_rect = [0, 0, self.rect[2] + 2*self.range, 2]
+        self.hit_rect = self.main.align_rect(self.hit_rect, init_sprite_text_rect(self.rect), "center")
+
     def new(self):
         pass
 
@@ -288,23 +290,11 @@ class Unit(pygame.sprite.Sprite):
         if self.current_health != self.max_health:
             draw health bar
         """
-        pass
+        # Debug Range
+        pygame.draw.rect(self.main.gameDisplay, RED, self.hit_rect, 1)
 
     def update(self):
-        """
-        if:
-            self.check_range()
-        """
-        pass
-
-    def check_range(self):
-        """
-        for enemy in self.enemy.units:
-            if collide(self.hit_rect, enemy.hit_rect):
-                if self.attack_speed < self.time - self.last_attack:
-                    self.game.attack_target(self, enemy)
-        """
-        pass
+        self.hit_rect = self.main.align_rect(self.hit_rect, init_sprite_text_rect(self.rect), "center")
 
 
 class Castle(pygame.sprite.Sprite):
@@ -376,22 +366,22 @@ MAIN_DICT = {
         1: {"name": "Scout", "size": [50, 50], "vel": [200, 0],
             "cost_gold": 50, "cost_mana": 0, "cost_supply": 1,
             "max_health": 25, "attack": 5, "delay_attack": 2500,
-            "gain_exp": 10},
+            "gain_exp": 10, "range": 5},
 
         2: {"name": "Squire", "size": [70, 100], "vel": [125, 0],
             "cost_gold": 100, "cost_mana": 0, "cost_supply": 1,
             "max_health": 100, "attack": 10, "delay_attack": 1000,
-            "gain_exp": 25},
+            "gain_exp": 25, "range": 20},
 
         3: {"name": "Archer", "size": [40, 60], "vel": [90, 0],
             "cost_gold": 125, "cost_mana": 5, "cost_supply": 1,
             "max_health": 65, "attack": 8, "delay_attack": 2000,
-            "gain_exp": 30},
+            "gain_exp": 30, "range": 200},
 
         4: {"name": "Priest", "size": [50, 70], "vel": [80, 0],
             "cost_gold": 150, "cost_mana": 25, "cost_supply": 1,
             "max_health": 50, "attack": 5, "delay_attack": 1500,
-            "gain_exp": 40},
+            "gain_exp": 40, "range": 10},
     },
 
 
