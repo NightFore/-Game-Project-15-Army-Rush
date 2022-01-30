@@ -25,18 +25,32 @@ class Game:
         self.buttons = pygame.sprite.Group()
         self.buttons_unit = pygame.sprite.Group()
 
+        # Debug
+        self.wip_check_new_game = False
+
     def draw(self):
         pass
 
     def update(self):
         self.dt = self.main.dt
 
+        if self.wip_check_new_game:
+            for unit in self.player.units:
+                if not self.unit_attack(unit, self.enemy.units):
+                    self.unit_move(unit)
+            for unit in self.enemy.units:
+                if not self.unit_attack(unit, self.player.units):
+                    self.unit_move(unit)
+
     def new_game(self):
+        self.wip_check_new_game = True
+
+        self.main.update_menu()
         self.player = Player(self.main, self.players, self.main_dict, data="players", item=1)
         self.enemy = Enemy(self.main, self.players, self.main_dict, data="players", item=2)
 
-        data = "production"
         # Unit Production
+        data = "production"
         item = "unit"
         for id in self.main_dict[item]:
             sprite = Button(self, self.buttons_unit, self.button_dict, data=data, item=item)
@@ -44,6 +58,11 @@ class Game:
 
             # WIP
             self.main.update_sprite_rect(sprite, 320*(id-1), 650)
+
+        # Buttons (Quit & Pause)
+        data = "interface"
+        for item in self.game.button_dict[data]:
+            Button(self, self.game.buttons, self.game.button_dict, data=data, item=item)
 
 
     def unit_production(self, args):
@@ -76,6 +95,27 @@ class Game:
     def unit_move(self, sprite):
         sprite.pos += sprite.vel * self.dt
         self.main.update_sprite_rect(sprite)
+
+    def unit_attack(self, unit, enemies):
+        collided = collide_rect_sprites(unit.rect, enemies)
+        if collided:
+            if pygame.time.get_ticks() - unit.last_attack >= unit.delay_attack:
+                unit.last_attack = pygame.time.get_ticks()
+                for enemy in collided:
+                    enemy.current_health -= unit.attack
+            return True
+        return False
+
+def collide_rect_sprites(rect, sprites):
+    """
+    Return a list of all "sprites" colliding with "rect"
+    """
+    sprites_collided = []
+    for sprite in sprites:
+        if rect.colliderect(sprite.rect):
+            sprites_collided.append(sprite)
+    return sprites_collided
+
 
 
 class Player(pygame.sprite.Sprite):
@@ -120,10 +160,6 @@ class Player(pygame.sprite.Sprite):
         self.ui_text_align = self.ui_settings["text_align"]
         self.ui_font = self.main.font_dict[self.ui_settings["font"]]
         self.ui_font_color = self.ui_settings["font_color"]
-
-        data = "interface"
-        for item in self.game.button_dict[data]:
-            Button(self, self.game.buttons, self.game.button_dict, data=data, item=item)
 
         # Experience
         ui_item = 1
@@ -218,7 +254,11 @@ class Unit(pygame.sprite.Sprite):
         self.main.update_sprite_rect(self, self.parent.pos[0], self.parent.pos[1])
 
     def load(self):
-        pass
+        # WIP
+        self.current_health = 10
+        self.attack = 1
+        self.last_attack = pygame.time.get_ticks()
+        self.delay_attack = 1000
 
     def new(self):
         pass
@@ -235,7 +275,7 @@ class Unit(pygame.sprite.Sprite):
         if:
             self.check_range()
         """
-        self.game.unit_move(self)
+        pass
 
     def check_range(self):
         """
@@ -282,7 +322,7 @@ MAIN_DICT = {
                           "font": "LiberationSerif_30", "text_align": "center",
                           "color": DARKGREY, "border_color": LIGHTSKYGREY, "font_color": WHITE},
         "players": {},
-        "unit": {"size": [50, 50], "align": "sw", "vel": [50, 0], "acc": [0, 0]},
+        "unit": {"size": [50, 50], "align": "sw", "vel": [100, 0], "acc": [0, 0]},
         "castle": {"size": [250, 250], "align": "sw"},
     },
 
