@@ -223,8 +223,11 @@ class Main:
         for sprite in self.all_sprites:
             sprite.kill()
 
-    def align_rect(self, surface, pos, align):
-        rect = surface.get_rect()
+    def align_rect(self, surface_rect, pos, align):
+        if isinstance(surface_rect, pygame.Surface):
+            rect = surface_rect.get_rect()
+        else:
+            rect = pygame.Rect(surface_rect)
         pos = (int(pos[0]), int(pos[1]))
         if align == "nw":
             rect.topleft = pos

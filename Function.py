@@ -82,7 +82,7 @@ def init_sprite_text(self, text=None):
 
     # Text
     self.text = text if text is not None else load_dict_item(self, "text", None)
-    self.text_pos = load_dict_item(self, "text_pos", [self.rect[0] + self.rect[2] // 2, self.rect[1] + self.rect[3] // 2])
+    self.text_pos = load_dict_item(self, "text_pos", init_sprite_text_rect(self.rect))
     self.text_align = load_dict_item(self, "text_align", self.align)
 
     # Font
@@ -94,6 +94,10 @@ def init_sprite_text(self, text=None):
         print("Font not initialized")
     if self.font_color is None:
         print("Font color not initialized")
+
+
+def init_sprite_text_rect(rect):
+    return [rect[0] + rect[2] // 2, rect[1] + rect[3] // 2]
 
 
 """

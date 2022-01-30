@@ -90,11 +90,11 @@ class Player(pygame.sprite.Sprite):
     def load(self):
         # Gold
         self.current_gold = 250
-        self.gain_gold = 1
+        self.gain_gold = 10
 
         # Mana
         self.current_mana = 0
-        self.gain_mana = 5
+        self.gain_mana = 1
 
         # Supply
         self.current_supply = 0
@@ -113,26 +113,39 @@ class Player(pygame.sprite.Sprite):
         self.ui_align = self.ui_settings["align"]
 
         # Font
+        self.ui_text_align = self.ui_settings["text_align"]
         self.ui_font = self.main.font_dict[self.ui_settings["font"]]
         self.ui_font_color = self.ui_settings["font_color"]
 
-        # Object
-        self.ui_item = 1
-        self.ui_object = self.dict[self.ui_data][self.ui_item]
-        self.ui_pos = self.ui_object["pos"]
-        self.ui_rect_1 = [self.ui_pos[0], self.ui_pos[1], self.ui_size[0], self.ui_size[1]]
+        # Gold
+        ui_item = 1
+        ui_object = self.dict[self.ui_data][ui_item]
+        ui_pos = ui_object["pos"]
+        self.ui_rect_1 = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
+        self.ui_text_pos_1 = init_sprite_text_rect(self.ui_rect_1)
 
-        self.ui_item = 2
-        self.ui_object = self.dict[self.ui_data][self.ui_item]
-        self.ui_pos = self.ui_object["pos"]
-        self.ui_rect_2 = [self.ui_pos[0], self.ui_pos[1], self.ui_size[0], self.ui_size[1]]
+        # Mana
+        ui_item = 2
+        ui_object = self.dict[self.ui_data][ui_item]
+        ui_pos = ui_object["pos"]
+        self.ui_rect_2 = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
+        self.ui_text_pos_2 = init_sprite_text_rect(self.ui_rect_2)
 
-        self.wip_text_pos = [1120, 18]
+        # Supply
+        ui_item = 3
+        ui_object = self.dict[self.ui_data][ui_item]
+        ui_pos = ui_object["pos"]
+        self.ui_rect_3 = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
+        self.ui_text_pos_3 = init_sprite_text_rect(self.ui_rect_3)
+
 
     def draw_interface(self):
         self.main.draw_surface(self.ui_align, self.ui_rect_1, self.ui_color, self.ui_border_size, self.ui_border_color)
         self.main.draw_surface(self.ui_align, self.ui_rect_2, self.ui_color, self.ui_border_size, self.ui_border_color)
-        self.main.draw_text("Gold: %i" % self.current_gold, self.ui_font, self.ui_font_color, self.wip_text_pos, self.ui_align)
+        self.main.draw_surface(self.ui_align, self.ui_rect_3, self.ui_color, self.ui_border_size, self.ui_border_color)
+        self.main.draw_text("Gold: %i" % self.current_gold, self.ui_font, self.ui_font_color, self.ui_text_pos_1, self.ui_text_align)
+        self.main.draw_text("Mana: %i" % self.current_mana, self.ui_font, self.ui_font_color, self.ui_text_pos_2, self.ui_text_align)
+        self.main.draw_text("Supply: %i/%i" % (self.current_supply, self.max_supply), self.ui_font, self.ui_font_color, self.ui_text_pos_3, self.ui_text_align)
 
     def new(self):
         pass
@@ -245,7 +258,7 @@ MAIN_DICT = {
         "key_repeat": (100, 30)},
 
     "settings": {
-        "interface_box": {"size": [180, 50], "border_size": [6, 6], "align": "nw",
+        "interface_box": {"size": [180, 50], "border_size": [6, 6], "align": "nw", "text_align": "center",
                           "color": DARKGREY, "border_color": LIGHTSKYGREY,
                           "font": "LiberationSerif_30", "font_color": WHITE},
         "players": {},
@@ -254,8 +267,9 @@ MAIN_DICT = {
     },
 
     "interface_box": {
-        1: {"pos": [1090, 10]},
+        1: {"pos": [710, 10]},
         2: {"pos": [900, 10]},
+        3: {"pos": [1090, 10]},
     },
 
     "players": {
