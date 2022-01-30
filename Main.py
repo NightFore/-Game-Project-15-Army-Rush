@@ -36,10 +36,10 @@ class Game:
 
         if self.wip_check_new_game:
             for unit in self.player.units:
-                if not self.unit_attack(unit, self.enemy.units):
+                if not self.unit_attack(unit, self.enemy.units, self.enemy.castle):
                     self.unit_move(unit)
             for unit in self.enemy.units:
-                if not self.unit_attack(unit, self.player.units):
+                if not self.unit_attack(unit, self.player.units, self.player.castle):
                     self.unit_move(unit)
 
     def new_game(self):
@@ -96,18 +96,26 @@ class Game:
         sprite.pos += sprite.vel * self.dt
         self.main.update_sprite_rect(sprite)
 
-    def unit_attack(self, unit, enemies):
+    def unit_attack(self, unit, enemies, castle):
         collided = collide_rect_sprites(unit.rect, enemies)
-        if collided:
+        collided_castle = unit.rect.colliderect(castle.rect) and castle.current_health > 0
+        if collided or collided_castle:
             if pygame.time.get_ticks() - unit.last_attack >= unit.delay_attack:
                 unit.last_attack = pygame.time.get_ticks()
-                for enemy in collided:
-                    enemy.current_health -= unit.attack
-                    if enemy.current_health <= 0:
-                        enemy.parent.current_supply -= enemy.cost_supply
-                        enemy.kill()
-                        if unit.parent == self.player:
-                            self.player.gain_exp += enemy.gain_exp
+                # Units
+                if collided:
+                    for enemy in collided:
+                        enemy.current_health -= unit.attack
+                        if enemy.current_health <= 0:
+                            enemy.parent.current_supply -= enemy.cost_supply
+                            enemy.kill()
+                            if unit.parent == self.player:
+                                self.player.gain_exp += enemy.gain_exp
+                # Castle
+                if collided_castle:
+                    castle.current_health -= unit.attack
+                    if castle.current_health <= 0:
+                        castle.kill()
             return True
         return False
 
@@ -134,12 +142,12 @@ class Player(pygame.sprite.Sprite):
 
     def load(self):
         # Gold
-        self.current_gold = 250
-        self.gain_gold = 10
+        self.current_gold = 500
+        self.gain_gold = 20
 
         # Mana
         self.current_mana = 0
-        self.gain_mana = 1
+        self.gain_mana = 5
 
         # Supply
         self.current_supply = 0
@@ -254,9 +262,11 @@ class Unit(pygame.sprite.Sprite):
         init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
 
     def init(self):
-        self.vel.x *= self.parent.vel.x
+        self.pos[0] = self.parent.pos[0]
+        self.pos[1] = self.parent.pos[1] + random.randint(-15, 15)
+        self.vel.x *= self.parent.vel.x * random.uniform(0.95, 1.05)
         self.align = self.parent.align
-        self.main.update_sprite_rect(self, self.parent.pos[0], self.parent.pos[1])
+        self.main.update_sprite_rect(self, self.pos[0], self.pos[1])
 
     def load(self):
         self.name = self.object["name"]
@@ -306,7 +316,8 @@ class Castle(pygame.sprite.Sprite):
         self.main.update_sprite_rect(self, self.parent.pos[0], self.parent.pos[1])
 
     def load(self):
-        pass
+        self.max_health = 100
+        self.current_health = self.max_health
 
     def new(self):
         pass
@@ -377,7 +388,7 @@ MAIN_DICT = {
             "max_health": 65, "attack": 8, "delay_attack": 2000,
             "gain_exp": 30},
 
-        4: {"name": "Priest", "size": [50, 70], "vel": [25, 0],
+        4: {"name": "Priest", "size": [50, 70], "vel": [80, 0],
             "cost_gold": 150, "cost_mana": 25, "cost_supply": 1,
             "max_health": 50, "attack": 5, "delay_attack": 1500,
             "gain_exp": 40},
