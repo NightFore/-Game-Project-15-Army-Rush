@@ -9,24 +9,25 @@ from ScaledGame import *
 
 class Game:
     def __init__(self, main):
+        # Game Initialization
         self.main = main
         self.game = self
         self.load()
         self.new()
 
     def load(self):
+        # Dictionaries
         self.main_dict = self.main.main_dict
         self.settings_dict = self.main_dict["settings"]
         self.button_dict = self.main.button_dict
 
     def new(self):
+        # Sprites
         self.players = pygame.sprite.Group()
         self.castles = pygame.sprite.Group()
+        self.units = pygame.sprite.Group()
         self.buttons = pygame.sprite.Group()
         self.buttons_unit = pygame.sprite.Group()
-
-        # Debug
-        self.wip_check_new_game = False
 
     def draw(self):
         pass
@@ -34,26 +35,19 @@ class Game:
     def update(self):
         self.dt = self.main.dt
 
-        # Attack
-        if self.wip_check_new_game:
-            for unit in self.player.units:
-                if not self.unit_attack(unit, self.enemy.units, self.enemy.castle):
-                    self.unit_move(unit)
-            for unit in self.enemy.units:
-                if not self.unit_attack(unit, self.player.units, self.player.castle):
-                    self.unit_move(unit)
+        for unit in self.units:
+            self.unit_action(unit)
+            self.unit_move(unit)
 
     def new_game(self):
-        # Debug
-        self.wip_check_new_game = True
-
         self.main.update_menu()
         self.player = Player(self.main, self.players, self.main_dict, data="players", item=1)
         self.enemy = Enemy(self.main, self.players, self.main_dict, data="players", item=2)
+        self.player.enemy = self.enemy
+        self.enemy.enemy = self.player
 
-        # Unit Production
-        data = "production"
-        item = "unit"
+        # Buttons (Unit Production)
+        data, item = "production", "unit"
         for id in self.main_dict[item]:
             sprite = Button(self, self.buttons_unit, self.button_dict, data=data, item=item)
             sprite.variable = [self.player, id]
@@ -65,7 +59,6 @@ class Game:
         data = "interface"
         for item in self.game.button_dict[data]:
             Button(self, self.game.buttons, self.game.button_dict, data=data, item=item)
-
 
     def unit_production(self, args):
         """
@@ -85,38 +78,53 @@ class Game:
             player.current_gold -= unit["cost_gold"]
             player.current_mana -= unit["cost_mana"]
             player.current_supply += unit["cost_supply"]
-            Unit(self.main, player.units, self.main_dict, data="unit", item=id, parent=player)
+            Unit(self.main, (self.units, player.units), self.main_dict, data="unit", item=id, parent=player)
 
     def resources_production(self, player):
         player.current_gold += player.gain_gold * self.dt
         player.current_mana += player.gain_mana * self.dt
 
-    def unit_move(self, sprite):
-        sprite.pos += sprite.vel * self.dt
-        self.main.update_sprite_rect(sprite)
+    def unit_action(self, unit):
+        # Initialization
+        action = pygame.time.get_ticks() - unit.last_action >= unit.delay_action
+        player, enemy = unit.parent, unit.parent.enemy
+        allies, enemies = player.units, enemy.units
+        collided_allies = collide_rect_sprites(unit.hit_rect, allies)
+        collided_enemies = collide_rect_sprites(unit.hit_rect, enemies)
+        if unit.hit_rect.colliderect(enemy.castle.rect):
+            collided_enemies.append(enemy.castle)
 
-    def unit_attack(self, unit, enemies, castle):
-        collided = collide_rect_sprites(unit.hit_rect, enemies)
-        collided_castle = unit.hit_rect.colliderect(castle.rect) and castle.current_health > 0
-        if collided or collided_castle:
-            if pygame.time.get_ticks() - unit.last_attack >= unit.delay_attack:
-                unit.last_attack = pygame.time.get_ticks()
-                # Units
-                if collided:
-                    for enemy in collided:
-                        enemy.current_health -= unit.attack
-                        if enemy.current_health <= 0:
-                            enemy.parent.current_supply -= enemy.cost_supply
-                            enemy.kill()
-                            if unit.parent == self.player:
-                                self.player.gain_exp += enemy.gain_exp
-                # Castle
-                if collided_castle:
-                    castle.current_health -= unit.attack
-                    if castle.current_health <= 0:
-                        castle.kill()
-            return True
-        return False
+        if unit.action_type == 1:
+            # Melee
+            unit.collide = collided_enemies
+            if unit.collide and action:
+                unit.last_action = pygame.time.get_ticks()
+                for target in collided_enemies:
+                    target.current_health -= unit.attack
+                    target.health_check()
+
+        elif unit.action_type == 2:
+            # Range
+            unit.collide = collided_enemies
+            if unit.collide and action:
+                pass
+
+        elif unit.action_type == 3:
+            # Attack Magic
+            unit.collide = collided_enemies
+            if unit.collide and action:
+                pass
+
+        elif unit.action_type == 4:
+            # Support Magic
+            unit.collide = collided_allies
+            if unit.collide and action:
+                pass
+
+    def unit_move(self, unit):
+        if not unit.collide:
+            unit.pos += unit.vel * self.dt
+            self.main.update_sprite_rect(unit)
 
 def collide_rect_sprites(rect, sprites):
     """
@@ -128,16 +136,56 @@ def collide_rect_sprites(rect, sprites):
             sprites_collided.append(sprite)
     return sprites_collided
 
+def init_interface(self, data, item=None):
+    # Initialization
+    self.ui_data = data
+    self.ui_settings = self.dict["settings"][self.ui_data]
+
+    # Box
+    self.ui_size = self.ui_settings["size"]
+    self.ui_border_size = self.ui_settings["border_size"]
+    self.ui_color = self.ui_settings["color"]
+    self.ui_border_color = self.ui_settings["border_color"]
+    self.ui_align = self.ui_settings["align"]
+
+    # Font
+    self.ui_text_align = self.ui_settings["text_align"]
+    self.ui_font = self.main.font_dict[self.ui_settings["font"]]
+    self.ui_font_color = self.ui_settings["font_color"]
+
+    # Rect & Text Pos
+    self.ui_rect = []
+    self.ui_text_pos = []
+    if item is None:
+        for index, item in enumerate(self.dict[self.ui_data]):
+            ui_pos = self.dict[self.ui_data][item]["pos"]
+            self.ui_rect.append([ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]])
+            self.ui_text_pos.append(init_sprite_text_rect(self.ui_rect[index]))
+    else:
+        ui_pos = self.dict[self.ui_data][item]["pos"]
+        self.ui_rect.append([ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]])
+        self.ui_text_pos.append(init_sprite_text_rect(self.ui_rect[0]))
+
+
+
+def draw_interface(self, ui_text):
+    # Rect
+    for rect in self.ui_rect:
+        self.main.draw_surface(rect, self.ui_color, self.ui_border_size, self.ui_border_color, self.ui_align)
+
+    # Text
+    for index, pos in enumerate(self.ui_text_pos):
+        self.main.draw_text(ui_text[index], self.ui_font, self.ui_font_color, pos, self.ui_text_align)
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
-        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
+        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True, text=False)
 
     def init(self):
-        self.units = pygame.sprite.Group()
         self.castle = Castle(self.main, self.game.castles, self.main.main_dict, data="castle", item=self.item, parent=self)
-        self.load_interface()
+        self.units = pygame.sprite.Group()
+        init_interface(self, "interface_box")
 
     def load(self):
         # Gold
@@ -156,78 +204,23 @@ class Player(pygame.sprite.Sprite):
         self.current_exp = 0
         self.gain_exp = 0
 
-    def load_interface(self):
-        # Initialization
-        self.ui_data = "interface_box"
-        self.ui_settings = self.dict["settings"][self.ui_data]
-
-        # Box
-        self.ui_size = self.ui_settings["size"]
-        self.ui_border_size = self.ui_settings["border_size"]
-        self.ui_color = self.ui_settings["color"]
-        self.ui_border_color = self.ui_settings["border_color"]
-        self.ui_align = self.ui_settings["align"]
-
-        # Font
-        self.ui_text_align = self.ui_settings["text_align"]
-        self.ui_font = self.main.font_dict[self.ui_settings["font"]]
-        self.ui_font_color = self.ui_settings["font_color"]
-
-        # Experience
-        ui_item = 1
-        ui_object = self.dict[self.ui_data][ui_item]
-        ui_pos = ui_object["pos"]
-        self.ui_rect_1 = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
-        self.ui_text_pos_1 = init_sprite_text_rect(self.ui_rect_1)
-
-        # Gold
-        ui_item = 2
-        ui_object = self.dict[self.ui_data][ui_item]
-        ui_pos = ui_object["pos"]
-        self.ui_rect_2 = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
-        self.ui_text_pos_2 = init_sprite_text_rect(self.ui_rect_2)
-
-        # Mana
-        ui_item = 3
-        ui_object = self.dict[self.ui_data][ui_item]
-        ui_pos = ui_object["pos"]
-        self.ui_rect_3 = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
-        self.ui_text_pos_3 = init_sprite_text_rect(self.ui_rect_3)
-
-        # Supply
-        ui_item = 4
-        ui_object = self.dict[self.ui_data][ui_item]
-        ui_pos = ui_object["pos"]
-        self.ui_rect_4 = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
-        self.ui_text_pos_4 = init_sprite_text_rect(self.ui_rect_4)
-
-
-    def draw_interface(self):
-        self.main.draw_surface(self.ui_rect_1, self.ui_color, self.ui_border_size, self.ui_border_color, self.ui_align)
-        self.main.draw_surface(self.ui_rect_2, self.ui_color, self.ui_border_size, self.ui_border_color, self.ui_align)
-        self.main.draw_surface(self.ui_rect_3, self.ui_color, self.ui_border_size, self.ui_border_color, self.ui_align)
-        self.main.draw_surface(self.ui_rect_4, self.ui_color, self.ui_border_size, self.ui_border_color, self.ui_align)
-        self.main.draw_text("EXP: %i" % self.gain_exp, self.ui_font, self.ui_font_color, self.ui_text_pos_1, self.ui_text_align)
-        self.main.draw_text("Gold: %i" % self.current_gold, self.ui_font, self.ui_font_color, self.ui_text_pos_2, self.ui_text_align)
-        self.main.draw_text("Mana: %i" % self.current_mana, self.ui_font, self.ui_font_color, self.ui_text_pos_3, self.ui_text_align)
-        self.main.draw_text("Supply: %i/%i" % (self.current_supply, self.max_supply), self.ui_font, self.ui_font_color, self.ui_text_pos_4, self.ui_text_align)
-
     def new(self):
         pass
 
     def draw(self):
-        self.draw_interface()
+        ui_text = ["EXP: %i" % self.gain_exp, "Gold: %i" % self.current_gold, "Mana: %i" % self.current_mana, "Supply: %i/%i" % (self.current_supply, self.max_supply)]
+        draw_interface(self, ui_text)
 
     def update(self):
         self.game.resources_production(self)
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
-        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
+        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True, text=False)
 
     def init(self):
-        self.units = pygame.sprite.Group()
         self.castle = Castle(self.main, self.game.castles, self.main.main_dict, data="castle", item=self.item, parent=self)
+        self.units = pygame.sprite.Group()
 
     def load(self):
         # Gold
@@ -258,7 +251,7 @@ class Enemy(pygame.sprite.Sprite):
 
 class Unit(pygame.sprite.Sprite):
     def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
-        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
+        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True, text=False)
 
     def init(self):
         self.pos[0] = self.parent.pos[0]
@@ -276,16 +269,17 @@ class Unit(pygame.sprite.Sprite):
         self.current_health = self.max_health
 
         self.attack = self.object["attack"]
-        self.delay_attack = self.object["delay_attack"]
-        self.last_attack = pygame.time.get_ticks()
+        self.action_type = self.object["action_type"]
+        self.delay_action = self.object["delay_action"]
+        self.last_action = pygame.time.get_ticks()
 
         # Debug Range
         self.range = self.object["range"]
-        self.hit_rect = [0, 0, self.rect[2] + 2*self.range, 2]
+        self.hit_rect = [0, 0, self.rect[2] + 2*self.range, self.rect[3]-20]
         self.hit_rect = self.main.align_rect(self.hit_rect, init_sprite_text_rect(self.rect), "center")
 
     def new(self):
-        pass
+        self.collide = False
 
     def draw(self):
         """
@@ -298,48 +292,40 @@ class Unit(pygame.sprite.Sprite):
     def update(self):
         self.hit_rect = self.main.align_rect(self.hit_rect, init_sprite_text_rect(self.rect), "center")
 
+    def health_check(self):
+        if self.current_health <= 0:
+            self.parent.current_supply -= self.cost_supply
+            if self.parent == self.game.enemy:
+                self.game.player.gain_exp += self.gain_exp
+            self.kill()
+
 
 class Castle(pygame.sprite.Sprite):
     def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
-        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True)
+        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True, text=False)
 
     def init(self):
         self.align = self.parent.align
         self.main.update_sprite_rect(self, self.parent.pos[0], self.parent.pos[1])
+        init_interface(self, "interface_castle", item=self.parent.item)
 
     def load(self):
-        self.max_health = 5000
+        self.max_health = self.object["max_health"]
         self.current_health = self.max_health
 
     def new(self):
-        # Initialization
-        self.ui_data = "interface_castle"
-        self.ui_settings = self.dict["settings"][self.ui_data]
-
-        # Box
-        self.ui_size = self.ui_settings["size"]
-        self.ui_border_size = self.ui_settings["border_size"]
-        self.ui_color = self.ui_settings["color"]
-        self.ui_border_color = self.ui_settings["border_color"]
-        self.ui_align = self.ui_settings["align"]
-
-        # Font
-        self.ui_text_align = self.ui_settings["text_align"]
-        self.ui_font = self.main.font_dict[self.ui_settings["font"]]
-        self.ui_font_color = self.ui_settings["font_color"]
-
-        ui_item = self.parent.item
-        ui_object = self.dict[self.ui_data][ui_item]
-        ui_pos = ui_object["pos"]
-        self.ui_rect = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
-        self.ui_text_pos = init_sprite_text_rect(self.ui_rect)
+        pass
 
     def draw(self):
-        self.main.draw_surface(self.ui_rect, self.ui_color, self.ui_border_size, self.ui_border_color, self.ui_align)
-        self.main.draw_text("Health: %i/%i" % (self.current_health, self.max_health), self.ui_font, self.ui_font_color, self.ui_text_pos, self.ui_text_align)
+        ui_text = ["Health: %i/%i" % (self.current_health, self.max_health)]
+        draw_interface(self, ui_text)
 
     def update(self):
         pass
+
+    def health_check(self):
+        if self.current_health <= 0:
+            self.kill()
 
 
 MAIN_DICT = {
@@ -355,7 +341,7 @@ MAIN_DICT = {
         "interface_box": {"size": [180, 50], "border_size": [6, 6], "align": "nw",
                           "font": "LiberationSerif_30", "text_align": "center",
                           "color": DARKGREY, "border_color": LIGHTSKYGREY, "font_color": WHITE},
-        "interface_castle": {"size": [250, 50], "border_size": [6, 6], "align": "nw",
+        "interface_castle": {"size": [280, 50], "border_size": [6, 6], "align": "nw",
                              "font": "LiberationSerif_30", "text_align": "center",
                              "color": DARKGREY, "border_color": LIGHTSKYGREY, "font_color": WHITE},
         "players": {},
@@ -374,7 +360,7 @@ MAIN_DICT = {
 
     "interface_castle": {
         1: {"pos": [20, 520]},
-        2: {"pos": [1010, 520]}
+        2: {"pos": [980, 520]}
 
     },
 
@@ -387,8 +373,8 @@ MAIN_DICT = {
 
     # Game (Castle) ------------------- #
     "castle": {
-        1: {},
-        2: {}
+        1: {"max_health": 16000},
+        2: {"max_health": 5000}
     },
 
 
@@ -396,23 +382,23 @@ MAIN_DICT = {
     "unit": {
         1: {"name": "Scout", "size": [50, 50], "vel": [200, 0],
             "cost_gold": 50, "cost_mana": 0, "cost_supply": 1,
-            "max_health": 25, "attack": 5, "delay_attack": 2500,
-            "gain_exp": 10, "range": 5, "attack_type": 1},
+            "max_health": 25, "attack": 5, "delay_action": 2500,
+            "gain_exp": 10, "range": 5, "action_type": 1},
 
         2: {"name": "Squire", "size": [70, 100], "vel": [125, 0],
             "cost_gold": 100, "cost_mana": 0, "cost_supply": 1,
-            "max_health": 100, "attack": 10, "delay_attack": 1000,
-            "gain_exp": 25, "range": 20, "attack_type": 1},
+            "max_health": 100, "attack": 10, "delay_action": 1000,
+            "gain_exp": 25, "range": 20, "action_type": 1},
 
         3: {"name": "Archer", "size": [40, 60], "vel": [90, 0],
             "cost_gold": 125, "cost_mana": 5, "cost_supply": 1,
-            "max_health": 65, "attack": 8, "delay_attack": 2000,
-            "gain_exp": 30, "range": 200, "attack_type": 2},
+            "max_health": 65, "attack": 8, "delay_action": 2000,
+            "gain_exp": 30, "range": 200, "action_type": 2},
 
         4: {"name": "Priest", "size": [50, 70], "vel": [80, 0],
             "cost_gold": 150, "cost_mana": 25, "cost_supply": 1,
-            "max_health": 50, "attack": 5, "delay_attack": 1500,
-            "gain_exp": 40, "range": 10, "attack_type": 3},
+            "max_health": 50, "attack": 5, "delay_action": 1500,
+            "gain_exp": 40, "range": 10, "action_type": 3},
     },
 
 
