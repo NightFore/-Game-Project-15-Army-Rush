@@ -34,6 +34,7 @@ class Game:
     def update(self):
         self.dt = self.main.dt
 
+        # Attack
         if self.wip_check_new_game:
             for unit in self.player.units:
                 if not self.unit_attack(unit, self.enemy.units, self.enemy.castle):
@@ -43,6 +44,7 @@ class Game:
                     self.unit_move(unit)
 
     def new_game(self):
+        # Debug
         self.wip_check_new_game = True
 
         self.main.update_menu()
@@ -306,14 +308,35 @@ class Castle(pygame.sprite.Sprite):
         self.main.update_sprite_rect(self, self.parent.pos[0], self.parent.pos[1])
 
     def load(self):
-        self.max_health = 100
+        self.max_health = 5000
         self.current_health = self.max_health
 
     def new(self):
-        pass
+        # Initialization
+        self.ui_data = "interface_castle"
+        self.ui_settings = self.dict["settings"][self.ui_data]
+
+        # Box
+        self.ui_size = self.ui_settings["size"]
+        self.ui_border_size = self.ui_settings["border_size"]
+        self.ui_color = self.ui_settings["color"]
+        self.ui_border_color = self.ui_settings["border_color"]
+        self.ui_align = self.ui_settings["align"]
+
+        # Font
+        self.ui_text_align = self.ui_settings["text_align"]
+        self.ui_font = self.main.font_dict[self.ui_settings["font"]]
+        self.ui_font_color = self.ui_settings["font_color"]
+
+        ui_item = self.parent.item
+        ui_object = self.dict[self.ui_data][ui_item]
+        ui_pos = ui_object["pos"]
+        self.ui_rect = [ui_pos[0], ui_pos[1], self.ui_size[0], self.ui_size[1]]
+        self.ui_text_pos = init_sprite_text_rect(self.ui_rect)
 
     def draw(self):
-        pass
+        self.main.draw_surface(self.ui_rect, self.ui_color, self.ui_border_size, self.ui_border_color, self.ui_align)
+        self.main.draw_text("Health: %i/%i" % (self.current_health, self.max_health), self.ui_font, self.ui_font_color, self.ui_text_pos, self.ui_text_align)
 
     def update(self):
         pass
@@ -332,6 +355,9 @@ MAIN_DICT = {
         "interface_box": {"size": [180, 50], "border_size": [6, 6], "align": "nw",
                           "font": "LiberationSerif_30", "text_align": "center",
                           "color": DARKGREY, "border_color": LIGHTSKYGREY, "font_color": WHITE},
+        "interface_castle": {"size": [250, 50], "border_size": [6, 6], "align": "nw",
+                             "font": "LiberationSerif_30", "text_align": "center",
+                             "color": DARKGREY, "border_color": LIGHTSKYGREY, "font_color": WHITE},
         "players": {},
         "unit": {"size": [50, 50], "align": "sw", "vel": [100, 0], "acc": [0, 0]},
         "castle": {"size": [250, 250], "align": "sw"},
@@ -346,6 +372,11 @@ MAIN_DICT = {
         4: {"pos": [1090, 10]},
     },
 
+    "interface_castle": {
+        1: {"pos": [20, 520]},
+        2: {"pos": [1010, 520]}
+
+    },
 
     # Game (Player) ------------------- #
     "players": {
@@ -366,22 +397,22 @@ MAIN_DICT = {
         1: {"name": "Scout", "size": [50, 50], "vel": [200, 0],
             "cost_gold": 50, "cost_mana": 0, "cost_supply": 1,
             "max_health": 25, "attack": 5, "delay_attack": 2500,
-            "gain_exp": 10, "range": 5},
+            "gain_exp": 10, "range": 5, "attack_type": 1},
 
         2: {"name": "Squire", "size": [70, 100], "vel": [125, 0],
             "cost_gold": 100, "cost_mana": 0, "cost_supply": 1,
             "max_health": 100, "attack": 10, "delay_attack": 1000,
-            "gain_exp": 25, "range": 20},
+            "gain_exp": 25, "range": 20, "attack_type": 1},
 
         3: {"name": "Archer", "size": [40, 60], "vel": [90, 0],
             "cost_gold": 125, "cost_mana": 5, "cost_supply": 1,
             "max_health": 65, "attack": 8, "delay_attack": 2000,
-            "gain_exp": 30, "range": 200},
+            "gain_exp": 30, "range": 200, "attack_type": 2},
 
         4: {"name": "Priest", "size": [50, 70], "vel": [80, 0],
             "cost_gold": 150, "cost_mana": 25, "cost_supply": 1,
             "max_health": 50, "attack": 5, "delay_attack": 1500,
-            "gain_exp": 40, "range": 10},
+            "gain_exp": 40, "range": 10, "attack_type": 3},
     },
 
 
