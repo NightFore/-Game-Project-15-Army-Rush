@@ -26,6 +26,7 @@ class Game:
         self.players = pygame.sprite.Group()
         self.castles = pygame.sprite.Group()
         self.units = pygame.sprite.Group()
+        self.projectiles = pygame.sprite.Group()
         self.buttons = pygame.sprite.Group()
         self.buttons_unit = pygame.sprite.Group()
 
@@ -37,7 +38,10 @@ class Game:
 
         for unit in self.units:
             self.unit_action(unit)
-            self.unit_move(unit)
+            self.sprite_move(unit, unit.collide)
+        for projectile in self.projectiles:
+            self.projectile_action(projectile)
+            self.sprite_move(projectile)
 
     def new_game(self):
         self.main.update_menu()
@@ -91,7 +95,7 @@ class Game:
         allies, enemies = player.units, enemy.units
         collided_allies = collide_rect_sprites(unit.hit_rect, allies)
         collided_enemies = collide_rect_sprites(unit.hit_rect, enemies)
-        if unit.hit_rect.colliderect(enemy.castle.rect):
+        if unit.hit_rect.colliderect(enemy.castle.rect) and enemy.castle.current_health > 0:
             collided_enemies.append(enemy.castle)
 
         if unit.action_type == 1:
@@ -107,7 +111,8 @@ class Game:
             # Range
             unit.collide = collided_enemies
             if unit.collide and action:
-                pass
+                unit.last_action = pygame.time.get_ticks()
+                Projectile(self, self.projectiles, self.main_dict, data="projectile", item=unit.item, parent=unit)
 
         elif unit.action_type == 3:
             # Attack Magic
@@ -121,10 +126,41 @@ class Game:
             if unit.collide and action:
                 pass
 
-    def unit_move(self, unit):
-        if not unit.collide:
-            unit.pos += unit.vel * self.dt
-            self.main.update_sprite_rect(unit)
+    def projectile_action(self, projectile):
+        # Initialization
+        player = projectile.parent.parent
+        enemy = player.enemy
+        enemies = enemy.units
+        collided_enemies = collide_rect_sprites(projectile.rect, enemies)
+        if projectile.rect.colliderect(enemy.castle.rect) and enemy.castle.current_health > 0:
+            collided_enemies.append(enemy.castle)
+
+        # Standard projectile
+        if projectile.action_type == 5:
+            if collided_enemies:
+                # Distance
+                target_dist_list = []
+                for target in collided_enemies:
+                    target_dist_list.append(abs(projectile.rect[0] - target.rect[0]))
+
+                # Minimum Distance
+                min_dist = target_dist_list[0]
+                min_target = collided_enemies[0]
+                for index, target_dist in enumerate(target_dist_list):
+                    if target_dist < min_dist:
+                        min_dist = target_dist
+                        min_target = collided_enemies[index]
+                min_target.current_health -= projectile.parent.attack
+                min_target.health_check()
+                projectile.kill()
+
+
+
+    def sprite_move(self, sprite, collide=False):
+        if not collide:
+            sprite.pos += sprite.vel * self.dt
+            self.main.update_sprite_rect(sprite)
+
 
 def collide_rect_sprites(rect, sprites):
     """
@@ -328,6 +364,32 @@ class Castle(pygame.sprite.Sprite):
             self.kill()
 
 
+
+
+class Projectile(pygame.sprite.Sprite):
+    def __init__(self, main, group, dict=None, data=None, item=None, parent=None, variable=None, action=None):
+        init_class(self, main, group, dict, data, item, parent, variable, action, surface=True, text=False)
+
+    def init(self):
+        x = int(self.parent.pos[0] + self.parent.rect[2])
+        y = int(self.parent.pos[1] - self.parent.rect[3] / 2)
+        self.main.update_sprite_rect(self, x, y)
+
+    def load(self):
+        pass
+
+    def new(self):
+        # WIP
+        self.action_type = 5
+
+
+    def draw(self):
+        pass
+
+    def update(self):
+        pass
+
+
 MAIN_DICT = {
     # Init (Settings) ----------------- #
     "game": {
@@ -345,8 +407,9 @@ MAIN_DICT = {
                              "font": "LiberationSerif_30", "text_align": "center",
                              "color": DARKGREY, "border_color": LIGHTSKYGREY, "font_color": WHITE},
         "players": {},
-        "unit": {"size": [50, 50], "align": "sw", "vel": [100, 0], "acc": [0, 0]},
         "castle": {"size": [250, 250], "align": "sw"},
+        "unit": {"size": [50, 50], "align": "sw", "vel": [100, 0], "acc": [0, 0]},
+        "projectile": {"size": [40, 8], "align": "center", "vel": [200, 0], "acc": [0, 0]}
     },
 
 
@@ -392,7 +455,7 @@ MAIN_DICT = {
 
         3: {"name": "Archer", "size": [40, 60], "vel": [90, 0],
             "cost_gold": 125, "cost_mana": 5, "cost_supply": 1,
-            "max_health": 65, "attack": 8, "delay_action": 2000,
+            "max_health": 65, "attack": 12, "delay_action": 2000,
             "gain_exp": 30, "range": 200, "action_type": 2},
 
         4: {"name": "Priest", "size": [50, 70], "vel": [80, 0],
@@ -400,6 +463,14 @@ MAIN_DICT = {
             "max_health": 50, "attack": 5, "delay_action": 1500,
             "gain_exp": 40, "range": 10, "action_type": 3},
     },
+
+
+    # Game (Projectile) --------------------- #
+    "projectile": {
+        3: {},
+    },
+
+
 
 
     # Background Dict ----------------- #
