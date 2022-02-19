@@ -27,6 +27,8 @@ class Game:
         self.castles = pygame.sprite.Group()
         self.units = pygame.sprite.Group()
         self.projectiles = pygame.sprite.Group()
+
+        # Interface
         self.buttons = pygame.sprite.Group()
         self.buttons_unit = pygame.sprite.Group()
 
@@ -34,17 +36,22 @@ class Game:
         pass
 
     def update(self):
+        # Main
         self.dt = self.main.dt
 
+        # Game
         for unit in self.units:
-            self.unit_action(unit)
+            self.sprite_action(unit, unit.parent, unit.parent.enemy, action=True)
             self.sprite_move(unit, unit.collide)
         for projectile in self.projectiles:
-            self.projectile_action(projectile)
+            self.sprite_action(projectile, projectile.parent.parent, projectile.parent.parent.enemy)
             self.sprite_move(projectile)
 
     def new_game(self):
+        # Initialization
         self.main.update_menu()
+
+        # Players
         self.player = Player(self.main, self.players, self.main_dict, data="players", item=1)
         self.enemy = Enemy(self.main, self.players, self.main_dict, data="players", item=2)
         self.player.enemy = self.enemy
@@ -65,11 +72,10 @@ class Game:
             Button(self, self.game.buttons, self.game.button_dict, data=data, item=item)
 
     def unit_production(self, args):
-        """
-        args = [player: class, id: int]
-        """
-        player = args[0]
-        id = args[1]
+        """ args = [player: class, id: int] """
+
+        # Initialization
+        player, id = args[0], args[1]
         unit = self.main_dict["unit"][id]
 
         # Check resources
@@ -85,63 +91,55 @@ class Game:
             Unit(self.main, (self.units, player.units), self.main_dict, data="unit", item=id, parent=player)
 
     def resources_production(self, player):
+        # Resources over time
         player.current_gold += player.gain_gold * self.dt
         player.current_mana += player.gain_mana * self.dt
 
-    def unit_action(self, unit):
-        # Initialization
-        action = pygame.time.get_ticks() - unit.last_action >= unit.delay_action
-        player, enemy = unit.parent, unit.parent.enemy
-        allies, enemies = player.units, enemy.units
-        collided_allies = collide_rect_sprites(unit.hit_rect, allies)
-        collided_enemies = collide_rect_sprites(unit.hit_rect, enemies)
-        if unit.hit_rect.colliderect(enemy.castle.rect) and enemy.castle.current_health > 0:
+    def sprite_action(self, sprite, player, enemy, action=False):
+        # Collision
+        collided_allies = collide_rect_sprites(sprite.hit_rect, player.units)
+        collided_enemies = collide_rect_sprites(sprite.hit_rect, enemy.units)
+        if sprite.hit_rect.colliderect(enemy.castle.rect) and enemy.castle.current_health > 0:
             collided_enemies.append(enemy.castle)
 
-        if unit.action_type == 1:
-            # Melee
-            unit.collide = collided_enemies
-            if unit.collide and action:
-                unit.last_action = pygame.time.get_ticks()
+        # Action
+        if action:
+            action = pygame.time.get_ticks() - sprite.last_action >= sprite.delay_action
+
+        # Melee
+        if sprite.action_type == 1:
+            sprite.collide = collided_enemies
+            if sprite.collide and action:
+                sprite.last_action = pygame.time.get_ticks()
                 for target in collided_enemies:
-                    target.current_health -= unit.attack
+                    target.current_health -= sprite.attack
                     target.health_check()
 
-        elif unit.action_type == 2:
-            # Range
-            unit.collide = collided_enemies
-            if unit.collide and action:
-                unit.last_action = pygame.time.get_ticks()
-                Projectile(self, self.projectiles, self.main_dict, data="projectile", item=unit.item, parent=unit)
+        # Ranged Attack
+        elif sprite.action_type == 2:
+            sprite.collide = collided_enemies
+            if sprite.collide and action:
+                sprite.last_action = pygame.time.get_ticks()
+                Projectile(self, self.projectiles, self.main_dict, data="projectile", item=sprite.item, parent=sprite)
 
-        elif unit.action_type == 3:
-            # Attack Magic
-            unit.collide = collided_enemies
-            if unit.collide and action:
+        # Magic Attack
+        elif sprite.action_type == 3:
+            sprite.collide = collided_enemies
+            if sprite.collide and action:
                 pass
 
-        elif unit.action_type == 4:
-            # Support Magic
-            unit.collide = collided_allies
-            if unit.collide and action:
-                pass
+        # Magic Support
+        elif sprite.action_type == 4:
+            if collided_allies and action:
+                sprite.collide = collided_allies
 
-    def projectile_action(self, projectile):
-        # Initialization
-        player = projectile.parent.parent
-        enemy = player.enemy
-        enemies = enemy.units
-        collided_enemies = collide_rect_sprites(projectile.rect, enemies)
-        if projectile.rect.colliderect(enemy.castle.rect) and enemy.castle.current_health > 0:
-            collided_enemies.append(enemy.castle)
-
-        # Standard projectile
-        if projectile.action_type == 5:
+        # Projectile
+        elif sprite.action_type == 5:
             if collided_enemies:
                 # Distance
                 target_dist_list = []
                 for target in collided_enemies:
-                    target_dist_list.append(abs(projectile.rect[0] - target.rect[0]))
+                    target_dist_list.append(abs(sprite.rect[0] - target.rect[0]))
 
                 # Minimum Distance
                 min_dist = target_dist_list[0]
@@ -150,9 +148,9 @@ class Game:
                     if target_dist < min_dist:
                         min_dist = target_dist
                         min_target = collided_enemies[index]
-                min_target.current_health -= projectile.parent.attack
+                min_target.current_health -= sprite.parent.attack
                 min_target.health_check()
-                projectile.kill()
+                sprite.kill()
 
 
 
@@ -380,14 +378,15 @@ class Projectile(pygame.sprite.Sprite):
 
     def new(self):
         # WIP
-        self.action_type = 5
+        self.action_type = self.object["action_type"]
+        self.hit_rect = self.rect
 
 
     def draw(self):
         pass
 
     def update(self):
-        pass
+        self.hit_rect = self.rect
 
 
 MAIN_DICT = {
@@ -467,7 +466,7 @@ MAIN_DICT = {
 
     # Game (Projectile) --------------------- #
     "projectile": {
-        3: {},
+        3: {"action_type": 5},
     },
 
 
