@@ -12,14 +12,17 @@ class Game:
         # Game Initialization
         self.main = main
         self.game = self
+        self.init_dict()
         self.load()
         self.new()
 
-    def load(self):
-        # Dictionaries
+    def init_dict(self):
         self.main_dict = self.main.main_dict
         self.settings_dict = self.main_dict["settings"]
         self.button_dict = self.main.button_dict
+
+    def load(self):
+        pass
 
     def new(self):
         # Sprites
